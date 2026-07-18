@@ -146,51 +146,89 @@ const publishing = [
 		{ id: 'publishing', nodes: publishing },
 	].map((flow, flowIndex) => (
 		<div
-			class="architecture-flow"
+			class="architecture-flow-shell"
 			id={`architecture-flow-${flow.id}`}
 			role="tabpanel"
 			aria-labelledby={`architecture-tab-${flow.id}`}
 			data-flow={flow.id}
 			hidden={flowIndex !== 0}
 		>
-			{flow.nodes.map((node, nodeIndex) => (
-				<button
-					type="button"
-					class="architecture-node"
-					aria-pressed={nodeIndex === 0 ? 'true' : 'false'}
-					aria-controls={`architecture-panel-${flow.id}-${node.id}`}
-					data-node={`${flow.id}-${node.id}`}
-				>
-					<span class="architecture-node__meta">
-						<span class="architecture-node__kind">{node.kind}</span>
-						<span class="architecture-node__index" aria-hidden="true">
-							{String(nodeIndex + 1).padStart(2, '0')}
+			<div class="architecture-progress" aria-hidden="true">
+				<span data-flow-progress></span>
+			</div>
+			<div class="architecture-flow" data-flow-track>
+				{flow.nodes.map((node, nodeIndex) => (
+					<button
+						type="button"
+						id={`architecture-node-${flow.id}-${node.id}`}
+						class="architecture-node"
+						aria-label={`Etapa ${nodeIndex + 1} de ${flow.nodes.length}: ${node.name}`}
+						aria-pressed={nodeIndex === 0 ? 'true' : 'false'}
+						aria-controls={`architecture-panel-${flow.id}-${node.id}`}
+						tabindex={nodeIndex === 0 ? '0' : '-1'}
+						data-node={`${flow.id}-${node.id}`}
+					>
+						<span class="architecture-node__meta">
+							<span class="architecture-node__kind">{node.kind}</span>
+							<span class="architecture-node__index" aria-hidden="true">
+								{String(nodeIndex + 1).padStart(2, '0')}
+							</span>
 						</span>
-					</span>
-					<strong>{node.name}</strong>
-					<small>{node.short}</small>
-				</button>
-			))}
+						<strong>{node.name}</strong>
+						<small>{node.short}</small>
+					</button>
+				))}
+			</div>
 		</div>
 	))}
 
-	{[
-		{ id: 'orchestration', nodes: orchestration },
-		{ id: 'publishing', nodes: publishing },
-	].flatMap((flow, flowIndex) =>
-		flow.nodes.map((node, nodeIndex) => (
-			<article
-				class="architecture-panel"
-				id={`architecture-panel-${flow.id}-${node.id}`}
-				data-panel={`${flow.id}-${node.id}`}
-				hidden={flowIndex !== 0 || nodeIndex !== 0}
-			>
-				<h3>{node.title}</h3>
-				<p>{node.description}</p>
-				<a href={node.href}>Explorar {node.name} →</a>
-			</article>
-		)),
-	)}
+	<div class="architecture-panels" aria-live="polite">
+		{[
+			{ id: 'orchestration', nodes: orchestration },
+			{ id: 'publishing', nodes: publishing },
+		].flatMap((flow, flowIndex) =>
+			flow.nodes.map((node, nodeIndex) => (
+				<section
+					class="architecture-panel"
+					id={`architecture-panel-${flow.id}-${node.id}`}
+					aria-labelledby={`architecture-node-${flow.id}-${node.id}`}
+					data-panel={`${flow.id}-${node.id}`}
+					hidden={flowIndex !== 0 || nodeIndex !== 0}
+				>
+					<div>
+						<h3>{node.title}</h3>
+						<p>{node.description}</p>
+					</div>
+					<div class="architecture-panel__footer">
+						<a href={node.href}>Explorar {node.name} →</a>
+						<div class="architecture-step-controls" role="group" aria-label="Cambiar etapa">
+							<button
+								type="button"
+								data-step-target={nodeIndex > 0
+									? `${flow.id}-${flow.nodes[nodeIndex - 1]!.id}`
+									: undefined}
+								disabled={nodeIndex === 0}
+							>
+								← Anterior
+							</button>
+							<span aria-hidden="true">
+								{String(nodeIndex + 1).padStart(2, '0')} / {String(flow.nodes.length).padStart(2, '0')}
+							</span>
+							<button
+								type="button"
+								data-step-target={nodeIndex < flow.nodes.length - 1
+									? `${flow.id}-${flow.nodes[nodeIndex + 1]!.id}`
+									: undefined}
+								disabled={nodeIndex === flow.nodes.length - 1}
+							>
+								Siguiente →
+							</button>
+						</div>
+					</div>
+				</section>
+			)),
+		)}
+	</div>
 </section>
 
 <script>
@@ -199,14 +237,42 @@ const publishing = [
 		const flows = explorer.querySelectorAll('[data-flow]');
 		const nodes = explorer.querySelectorAll('[data-node]');
 		const panels = explorer.querySelectorAll('[data-panel]');
+		const stepControls = explorer.querySelectorAll('[data-step-target]');
+		const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-		function showNode(key: string | null) {
+		function showNode(key: string | null, options: { focus?: boolean; scroll?: boolean } = {}) {
+			const activeNode = Array.from(nodes).find((node) => node.getAttribute('data-node') === key);
+			if (!(activeNode instanceof HTMLElement)) return;
+
 			for (const node of nodes) {
-				node.setAttribute('aria-pressed', String(node.getAttribute('data-node') === key));
+				const active = node === activeNode;
+				node.setAttribute('aria-pressed', String(active));
+				node.setAttribute('tabindex', active ? '0' : '-1');
 			}
 			for (const panel of panels) {
 				panel.toggleAttribute('hidden', panel.getAttribute('data-panel') !== key);
 			}
+
+			const flow = activeNode.closest('[data-flow]');
+			const track = activeNode.closest('[data-flow-track]');
+			if (flow && track instanceof HTMLElement) {
+				const flowNodes = Array.from(track.querySelectorAll('[data-node]'));
+				const index = flowNodes.indexOf(activeNode);
+				const progress = flow.querySelector('[data-flow-progress]');
+				if (progress instanceof HTMLElement) {
+					const percentage = flowNodes.length > 1 ? (index / (flowNodes.length - 1)) * 100 : 100;
+					progress.style.width = `${percentage}%`;
+				}
+				if (options.scroll !== false && track.scrollWidth > track.clientWidth) {
+					const left = activeNode.offsetLeft - (track.clientWidth - activeNode.offsetWidth) / 2;
+					track.scrollTo({
+						left: Math.max(0, left),
+						behavior: reduceMotion.matches ? 'auto' : 'smooth',
+					});
+				}
+			}
+
+			if (options.focus) activeNode.focus();
 		}
 
 		function selectFlow(tab: Element) {
@@ -220,7 +286,7 @@ const publishing = [
 				flow.toggleAttribute('hidden', flow.getAttribute('data-flow') !== selected);
 			}
 			const first = explorer.querySelector(`[data-node^="${selected}-"]`);
-			if (first) showNode(first.getAttribute('data-node'));
+			if (first) showNode(first.getAttribute('data-node'), { scroll: false });
 		}
 
 		for (const tab of tabs) {
@@ -243,6 +309,34 @@ const publishing = [
 
 		for (const node of nodes) {
 			node.addEventListener('click', () => showNode(node.getAttribute('data-node')));
+			node.addEventListener('keydown', (event) => {
+				if (!(event instanceof KeyboardEvent) || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
+					return;
+				}
+				const track = node.closest('[data-flow-track]');
+				if (!track) return;
+				const ordered = Array.from(track.querySelectorAll('[data-node]'));
+				const current = ordered.indexOf(node);
+				const nextIndex = event.key === 'Home'
+					? 0
+					: event.key === 'End'
+						? ordered.length - 1
+						: Math.max(0, Math.min(ordered.length - 1, current + (event.key === 'ArrowRight' ? 1 : -1)));
+				const next = ordered[nextIndex];
+				if (next instanceof HTMLElement && next !== node) {
+					event.preventDefault();
+					showNode(next.getAttribute('data-node'), { focus: true });
+				}
+			});
 		}
+
+		for (const control of stepControls) {
+			control.addEventListener('click', () => {
+				showNode(control.getAttribute('data-step-target'), { focus: true });
+			});
+		}
+
+		const initialNode = explorer.querySelector('[data-node][aria-pressed="true"]');
+		if (initialNode) showNode(initialNode.getAttribute('data-node'), { scroll: false });
 	}
 </script>

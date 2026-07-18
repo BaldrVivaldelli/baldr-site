@@ -3,6 +3,14 @@ title: Changelog
 description: Evolución del sitio público de Baldr.
 ---
 
+## 0.1.2 — Recorrido interactivo alineado
+
+- Tarjetas de etapa uniformes y sin márgenes heredados de Markdown.
+- Carrusel adaptado al ancho real del componente, incluso dentro de la documentación.
+- Navegación visible con controles anterior y siguiente, contador y progreso.
+- Cambio de recorrido, panel y posición sincronizado al seleccionar una etapa.
+- Navegación por teclado y movimiento reducido respetados.
+
 ## 0.1.1 — Portada con una retícula de producto
 
 - Hero, mensaje principal y diagrama reunidos en una composición equilibrada.
