@@ -1,86 +1,95 @@
 # Baldr Site
 
-Sitio público estático de [Baldr](https://github.com/BaldrVivaldelli/baldr-router):
-landing, explorador de arquitectura, guías de producto y referencia técnica
-versionada.
+Static public website for [Baldr](https://github.com/BaldrVivaldelli/baldr-router):
+landing page, architecture explorer, product guides, and versioned technical
+reference.
 
-## Frontera entre repositorios
+English is the default language. Every public route has a Spanish equivalent
+under `/es/`, and Starlight's language selector preserves the current page
+when switching locales.
 
-| Repositorio | Fuente de verdad |
+## Repository boundary
+
+| Repository | Source of truth |
 | --- | --- |
-| `baldr-site` | navegación, diseño, explicaciones y guías públicas |
-| `baldr-router` | código, contratos, especificaciones y changelog del runtime |
+| `baldr-site` | navigation, design, explanations, translations, and public guides |
+| `baldr-router` | code, contracts, specifications, and runtime changelog |
 
-Los documentos bajo `src/content/docs/reference/router/` son generados. Su
-origen y tag exacto viven en [`router-docs.json`](router-docs.json); cada página
-incluye el digest SHA-256 de la fuente.
+Documents under `src/content/docs/reference/router/` and
+`src/content/docs/es/reference/router/` are generated. Their exact source,
+tag, source language, and translation inputs live in
+[`router-docs.json`](router-docs.json); every generated page includes the
+canonical source's SHA-256 digest.
 
-## Desarrollo local
+## Local development
 
-Requisitos:
+Requirements:
 
-- Node.js 22 o posterior;
+- Node.js 22 or later;
 - npm;
-- un checkout de `baldr-router` con el tag configurado, solamente para
-  sincronizar la referencia.
+- a `baldr-router` checkout containing the configured tag, only when
+  synchronizing the reference.
 
 ```bash
 npm ci
 npm run dev
 ```
 
-Astro sirve el sitio bajo `http://localhost:4321/baldr-site/` para reproducir el
-subpath de GitHub Pages.
+Astro serves the site at `http://localhost:4321/baldr-site/` to reproduce the
+GitHub Pages subpath. Spanish starts at
+`http://localhost:4321/baldr-site/es/`.
 
-## Comandos
+## Commands
 
-| Comando | Propósito |
+| Command | Purpose |
 | --- | --- |
-| `npm run dev` | servidor de desarrollo |
-| `npm run build` | build estático en `dist/` |
-| `npm run preview` | previsualizar el build |
-| `npm run check` | tipos, build, HTML/a11y y enlaces internos con anchors |
-| `npm run sync:router-docs` | regenerar referencia desde el tag fijado |
-| `npm run sync:check` | comprobar que la referencia no se desalineó |
+| `npm run dev` | development server |
+| `npm run build` | static build in `dist/` |
+| `npm run preview` | preview the build |
+| `npm run check` | types, build, HTML/a11y, and internal links with anchors |
+| `npm run sync:router-docs` | regenerate both localized references from the pinned tag |
+| `npm run sync:check` | verify that generated references are aligned |
 
-## Sincronizar documentación del Router
+## Synchronize Router documentation
 
 ```bash
 BALDR_ROUTER_SOURCE=../baldr-router npm run sync:router-docs
 BALDR_ROUTER_SOURCE=../baldr-router npm run sync:check
 ```
 
-El script usa `git show <ref>:<path>`; no copia el working tree actual. Esto
-garantiza que el sitio documente exactamente el release declarado aunque el
-checkout local tenga cambios posteriores.
+The script uses `git show <ref>:<path>`; it does not copy the current working
+tree. This guarantees that the website documents the declared release even
+when the local checkout contains later changes.
 
-Para avanzar a otro release:
+To move to another release:
 
-1. actualizá `ref` en `router-docs.json`;
-2. actualizá el `ref` del segundo checkout en `.github/workflows/ci.yml`;
-3. ejecutá la sincronización;
-4. revisá el diff y corré `npm run check`.
+1. update `ref` in `router-docs.json`;
+2. update the second checkout's `ref` in `.github/workflows/ci.yml`;
+3. update translation sources when canonical content changed;
+4. run synchronization;
+5. review the diff and run `npm run check`.
 
-## Despliegue
+## Deployment
 
-- cada pull request ejecuta tipos, sincronización, build y enlaces;
-- cada push a `main` vuelve a validar y despliega `dist/` en GitHub Pages;
-- el sitio se publica en `https://baldrvivaldelli.github.io/baldr-site/`.
+- every pull request checks types, synchronization, the build, and links;
+- every push to `main` validates again and deploys `dist/` to GitHub Pages;
+- the site is published at `https://baldrvivaldelli.github.io/baldr-site/`.
 
-La configuración de Pages debe usar **GitHub Actions** como fuente de
-publicación.
+Pages must use **GitHub Actions** as its publishing source.
 
-## Estructura
+## Structure
 
 ```text
-src/content/docs/       páginas y guías
-src/components/         experiencias interactivas
-src/styles/             identidad visual y responsive
-scripts/                sincronización y validadores
-router-docs.json        contrato de referencia versionada
-.github/workflows/      CI y GitHub Pages
+src/content/docs/       English pages and guides; Spanish content under es/
+src/components/         localized interactive experiences
+src/i18n/               shared interface copy
+src/translations/       auditable technical-reference translations
+src/styles/             visual identity and responsive behavior
+scripts/                synchronization and validators
+router-docs.json        versioned, localized reference contract
+.github/workflows/      CI and GitHub Pages
 ```
 
-## Licencia
+## License
 
 [MIT](LICENSE)

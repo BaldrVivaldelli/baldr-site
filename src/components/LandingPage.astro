@@ -1,96 +1,28 @@
 ---
 import ArchitectureExplorer from './ArchitectureExplorer.astro';
-
-const responsibilities = [
-	{
-		index: '01',
-		label: 'Coordinar',
-		title: 'Router convierte intención en trabajo durable',
-		description:
-			'Fija roles, políticas y participantes exactos sin incorporar el código privado de los agentes.',
-		href: 'components/router/',
-	},
-	{
-		index: '02',
-		label: 'Resolver',
-		title: 'Agent Manager entrega identidad verificable',
-		description:
-			'Resuelve AgentRef, versión, capacidades y digest antes de que una fase pueda ejecutarse.',
-		href: 'components/agent-manager/',
-	},
-	{
-		index: '03',
-		label: 'Publicar',
-		title: 'SDK y Builder producen releases reproducibles',
-		description:
-			'Cada lenguaje conserva su toolchain y cruza la frontera como un artefacto inmutable.',
-		href: 'components/agent-builder/',
-	},
-	{
-		index: '04',
-		label: 'Ejecutar',
-		title: 'Runner aplica capacidades y efectos',
-		description:
-			'Verifica el artefacto, limita la invocación y entrega únicamente el workspace autorizado.',
-		href: 'components/runner/',
-	},
-];
-
-const paths = [
-	{
-		eyebrow: 'Entender',
-		title: 'Qué es Baldr',
-		description: 'El modelo del sistema en cinco minutos.',
-		href: 'overview/',
-	},
-	{
-		eyebrow: 'Construir',
-		title: 'Crear un agente',
-		description: 'Del scaffold al primer test local.',
-		href: 'guides/create-agent/',
-	},
-	{
-		eyebrow: 'Conectar',
-		title: 'Integrar una superficie',
-		description: 'VS Code, Kiro, CLI y MCP.',
-		href: 'integrations/',
-	},
-	{
-		eyebrow: 'Verificar',
-		title: 'Leer los contratos',
-		description: 'Referencia técnica fijada por versión.',
-		href: 'reference/',
-	},
-];
+import { copyForLocale } from '../i18n/site-copy';
 
 const base = import.meta.env.BASE_URL.endsWith('/')
 	? import.meta.env.BASE_URL
 	: `${import.meta.env.BASE_URL}/`;
+const localeBase = `${base}${Astro.currentLocale === 'es' ? 'es/' : ''}`;
+const landing = copyForLocale(Astro.currentLocale).landing;
 ---
 
 <div class="landing-page">
 	<section class="landing-intro" aria-labelledby="landing-intro-title">
 		<div class="landing-section-heading">
-			<p class="landing-eyebrow">Una frontera clara</p>
-			<h2 id="landing-intro-title">El comportamiento vive afuera.<br />La coordinación queda en Baldr.</h2>
+			<p class="landing-eyebrow">{landing.eyebrow}</p>
+			<h2 id="landing-intro-title" set:html={landing.title} />
 		</div>
-		<p class="landing-intro__copy">
-			Los equipos mantienen código, prompts, pruebas y releases. Baldr descubre identidades
-			exactas, controla capacidades, ejecuta artefactos externos y conserva el estado del trabajo.
-		</p>
+		<p class="landing-intro__copy">{landing.intro}</p>
 		<dl class="landing-principles">
-			<div>
-				<dt>Propiedad</dt>
-				<dd>El agente sigue en el repositorio de su equipo.</dd>
-			</div>
-			<div>
-				<dt>Identidad</dt>
-				<dd>AgentRef, versión y digest fijan qué se ejecuta.</dd>
-			</div>
-			<div>
-				<dt>Continuidad</dt>
-				<dd>El workflow sobrevive a clientes y reinicios.</dd>
-			</div>
+			{landing.principles.map((principle) => (
+				<div>
+					<dt>{principle.term}</dt>
+					<dd>{principle.description}</dd>
+				</div>
+			))}
 		</dl>
 	</section>
 
@@ -99,24 +31,21 @@ const base = import.meta.env.BASE_URL.endsWith('/')
 	<section class="landing-responsibilities" aria-labelledby="responsibilities-title">
 		<div class="landing-section-heading landing-section-heading--split">
 			<div>
-				<p class="landing-eyebrow">Responsabilidades</p>
-				<h2 id="responsibilities-title">Un núcleo chico.<br />Piezas con límites.</h2>
+				<p class="landing-eyebrow">{landing.responsibilitiesEyebrow}</p>
+				<h2 id="responsibilities-title" set:html={landing.responsibilitiesTitle} />
 			</div>
-			<p>
-				Cada componente tiene una sola razón para cambiar. Esa separación permite sumar agentes,
-				lenguajes y superficies sin agrandar el Router.
-			</p>
+			<p>{landing.responsibilitiesIntro}</p>
 		</div>
 		<div class="responsibility-grid">
-			{responsibilities.map((item) => (
-				<a class="responsibility-card" href={`${base}${item.href}`}>
+			{landing.responsibilities.map((item) => (
+				<a class="responsibility-card" href={`${localeBase}${item.href}`}>
 					<div class="responsibility-card__meta">
 						<span>{item.index}</span>
 						<span>{item.label}</span>
 					</div>
 					<h3>{item.title}</h3>
 					<p>{item.description}</p>
-					<span class="responsibility-card__link" aria-hidden="true">Conocer la pieza <span>→</span></span>
+					<span class="responsibility-card__link" aria-hidden="true">{landing.learnMore} <span>→</span></span>
 				</a>
 			))}
 		</div>
@@ -124,12 +53,12 @@ const base = import.meta.env.BASE_URL.endsWith('/')
 
 	<section class="landing-paths" aria-labelledby="paths-title">
 		<div class="landing-paths__heading">
-			<p class="landing-eyebrow">Elegí tu entrada</p>
-			<h2 id="paths-title">Empezá por lo que necesitás resolver.</h2>
+			<p class="landing-eyebrow">{landing.pathsEyebrow}</p>
+			<h2 id="paths-title">{landing.pathsTitle}</h2>
 		</div>
-		<nav class="landing-paths__grid" aria-label="Recorridos para comenzar">
-			{paths.map((path) => (
-				<a href={`${base}${path.href}`}>
+		<nav class="landing-paths__grid" aria-label={landing.pathsLabel}>
+			{landing.paths.map((path) => (
+				<a href={`${localeBase}${path.href}`}>
 					<span class="landing-paths__eyebrow">{path.eyebrow}</span>
 					<strong>{path.title}</strong>
 					<small>{path.description}</small>

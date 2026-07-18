@@ -1,24 +1,23 @@
 ---
-title: CLI y MCP
-description: Automatización, diagnóstico y clientes neutrales.
+title: CLI and MCP
+description: Automation, diagnostics, and neutral clients.
 ---
 
-Router ofrece una CLI operacional y un servidor MCP. Ambos llegan a la misma
-implementación de dominio.
+Router provides an operational CLI and an MCP server. Both reach the same
+domain implementation.
 
-## Intenciones de fachada
+## Facade intents
 
 ```text
-setup   -> preparación, configuración y readiness
-status  -> salud y estado reciente
-run     -> crear, continuar o recuperar trabajo durable
+setup   -> preparation, configuration, and readiness
+status  -> health and recent state
+run     -> create, continue, or recover durable work
 ```
 
 ## CLI
 
-La CLI agrega operaciones administrativas y de diagnóstico alrededor de esas
-intenciones: qualification, lifecycle, catálogo de agentes, sincronización y
-reconciliación.
+The CLI adds administrative and diagnostic operations around those intents:
+qualification, lifecycle, agent catalog, synchronization, and reconciliation.
 
 ```bash
 baldr-router --help
@@ -27,8 +26,8 @@ baldr-router facade status --client cli
 
 ## MCP
 
-Cualquier cliente compatible puede iniciar el launcher con el subcomando `mcp`.
-Los valores privados se envían como argumentos o entorno del proceso; los logs
-del runtime conservan nombres de flags, no sus valores.
+Any compatible client can start the launcher with the `mcp` subcommand. Private
+values are sent as process arguments or environment; runtime logs preserve flag
+names, not their values.
 
-Referencia de arquitectura: [facade contract](/baldr-site/reference/router/architecture/).
+Architecture reference: [facade contract](/baldr-site/reference/router/architecture/).

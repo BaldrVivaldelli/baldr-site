@@ -1,12 +1,12 @@
 ---
 title: "Operating the Agent Manager"
-description: "Referencia técnica de Baldr sincronizada desde v0.20.0."
+description: "Baldr technical reference synchronized from v0.20.0."
 editUrl: false
 ---
 
-:::note[Fuente canónica · v0.20.0]
-Esta página se genera desde [`agent-manager-operations.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/agent-manager-operations.md). No la edites en este repositorio.
-Digest de la fuente: `6deabd23cd7d3920be123974fc49246547c7f2a2abacfb64ac83e29255c75bac`.
+:::note[Canonical source · v0.20.0]
+This page is generated from [`agent-manager-operations.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/agent-manager-operations.md). Do not edit it in this repository.
+Source digest: `6deabd23cd7d3920be123974fc49246547c7f2a2abacfb64ac83e29255c75bac`.
 :::
 The Agent Manager is Baldr's catalog control plane. It stores immutable
 manifests and their lifecycle state; it does not host agent code, proxy model

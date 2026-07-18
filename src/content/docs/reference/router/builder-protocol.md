@@ -1,12 +1,12 @@
 ---
 title: "Builder Protocol v1"
-description: "Referencia técnica de Baldr sincronizada desde v0.20.0."
+description: "Baldr technical reference synchronized from v0.20.0."
 editUrl: false
 ---
 
-:::note[Fuente canónica · v0.20.0]
-Esta página se genera desde [`builder-protocol.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/builder-protocol.md). No la edites en este repositorio.
-Digest de la fuente: `153f8914914c99d3ca8dcc44c5042fa6d4401a037b1a1faf4af521f49e4b69d7`.
+:::note[Canonical source · v0.20.0]
+This page is generated from [`builder-protocol.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/builder-protocol.md). Do not edit it in this repository.
+Source digest: `153f8914914c99d3ca8dcc44c5042fa6d4401a037b1a1faf4af521f49e4b69d7`.
 :::
 Builder Protocol separates the developer-facing tools from language-specific
 build implementations. An SDK remains an authoring library; it does not import

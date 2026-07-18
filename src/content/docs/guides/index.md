@@ -1,28 +1,28 @@
 ---
-title: Elegir un recorrido
-description: Guías prácticas según cómo quieras empezar a usar Baldr.
+title: Choose a path
+description: Practical guides based on how you want to start using Baldr.
 ---
 
-No necesitás crear un agente externo para empezar.
+You do not need to create an external agent to get started.
 
-## Usar Codex o Kiro
+## Use Codex or Kiro
 
-Instalá la superficie correspondiente, elegí un workspace y ejecutá una tarea.
-Router puede coordinar providers normales con el workflow durable existente.
+Install the appropriate surface, choose a workspace, and run a task. Router can
+coordinate standard providers with the existing durable workflow.
 
 - [VS Code](../integrations/vscode/)
 - [Kiro](../integrations/kiro/)
-- [CLI y MCP](../integrations/cli-mcp/)
+- [CLI and MCP](../integrations/cli-mcp/)
 
-## Crear un agente propio
+## Create your own agent
 
-Seguí tres pasos:
+Follow three steps:
 
-1. [Crear y probar](./create-agent/)
-2. [Construir y publicar](./publish-agent/)
-3. [Ejecutar con Baldr](./run-agent/)
+1. [Create and test](./create-agent/)
+2. [Build and publish](./publish-agent/)
+3. [Run with Baldr](./run-agent/)
 
-## Consultar contratos exactos
+## Read the exact contracts
 
-Las guías priorizan el camino cotidiano. Para formatos, invariantes y
-operaciones completas usá la [referencia técnica sincronizada](../reference/).
+Guides prioritize the everyday path. For formats, invariants, and complete
+operations, use the [synchronized technical reference](../reference/).

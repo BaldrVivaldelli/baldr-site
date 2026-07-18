@@ -1,12 +1,12 @@
 ---
 title: "External agent resolution"
-description: "Referencia técnica de Baldr sincronizada desde v0.20.0."
+description: "Baldr technical reference synchronized from v0.20.0."
 editUrl: false
 ---
 
-:::note[Fuente canónica · v0.20.0]
-Esta página se genera desde [`external-agent-registry.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/external-agent-registry.md). No la edites en este repositorio.
-Digest de la fuente: `750f1d660079e83817ff2f6f1948593d39b07becde1e59b4d1d3ef121e71cee8`.
+:::note[Canonical source · v0.20.0]
+This page is generated from [`external-agent-registry.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/external-agent-registry.md). Do not edit it in this repository.
+Source digest: `750f1d660079e83817ff2f6f1948593d39b07becde1e59b4d1d3ef121e71cee8`.
 :::
 Baldr coordinates agents that remain owned and executed outside the router. An
 external binding uses four separate contracts:

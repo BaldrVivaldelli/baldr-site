@@ -1,26 +1,26 @@
 ---
-title: Componentes
-description: Las responsabilidades que forman la plataforma Baldr.
+title: Components
+description: The responsibilities that make up the Baldr platform.
 ---
 
-Cada pieza tiene una frontera deliberada. Esa separación permite agregar
-lenguajes, superficies y ejecutores sin convertir Router en un monolito.
+Every component has a deliberate boundary. This separation makes it possible
+to add languages, surfaces, and executors without turning Router into a monolith.
 
-| Componente | Responsabilidad principal | Entrada | Salida |
+| Component | Primary responsibility | Input | Output |
 | --- | --- | --- | --- |
-| [Router](./router/) | Coordinar trabajo durable | intención + configuración | fases, decisiones y resultado |
-| [Agent Manager](./agent-manager/) | Resolver identidades | rol + capacidades | `AgentRef + digest + ubicación` |
-| [Runner](./runner/) | Ejecutar artefactos | invocación verificada | eventos privados + resultado |
-| [Agent Builder](./agent-builder/) | Gestionar releases | proyecto + driver | artefacto + manifiestos |
-| [SDKs](./sdks/) | API de autoría | código del equipo | agente compatible |
+| [Router](./router/) | Coordinate durable work | intent + configuration | phases, decisions, and result |
+| [Agent Manager](./agent-manager/) | Resolve identities | role + capabilities | `AgentRef + digest + location` |
+| [Runner](./runner/) | Execute artifacts | verified invocation | private events + result |
+| [Agent Builder](./agent-builder/) | Manage releases | project + driver | artifact + manifests |
+| [SDKs](./sdks/) | Authoring API | team code | compatible agent |
 
-## Regla de dependencia
+## Dependency rule
 
 ```text
-SDK <- código del agente
-Builder -> driver -> toolchain del lenguaje
-Router -> Manager -> Runner -> artefacto
+SDK <- agent code
+Builder -> driver -> language toolchain
+Router -> Manager -> Runner -> artifact
 ```
 
-El SDK no inicia Builder. Builder no ejecuta workflows. Agent Manager no carga
-artefactos. Runner no decide qué agente ocupa un rol.
+The SDK does not start Builder. Builder does not execute workflows. Agent
+Manager does not load artifacts. Runner does not decide which agent fills a role.

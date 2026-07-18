@@ -1,12 +1,12 @@
 ---
 title: "Real Environment Qualification — v0.20"
-description: "Referencia técnica de Baldr sincronizada desde v0.20.0."
+description: "Baldr technical reference synchronized from v0.20.0."
 editUrl: false
 ---
 
-:::note[Fuente canónica · v0.20.0]
-Esta página se genera desde [`real-environment-qualification.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/real-environment-qualification.md). No la edites en este repositorio.
-Digest de la fuente: `f855132a5800d312c86f8252a7cd4dda5254455fb4f3889c6abf5e6cfd0fb9dd`.
+:::note[Canonical source · v0.20.0]
+This page is generated from [`real-environment-qualification.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/real-environment-qualification.md). Do not edit it in this repository.
+Source digest: `f855132a5800d312c86f8252a7cd4dda5254455fb4f3889c6abf5e6cfd0fb9dd`.
 :::
 Baldr distinguishes three different claims:
 

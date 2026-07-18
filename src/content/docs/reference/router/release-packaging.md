@@ -1,12 +1,12 @@
 ---
 title: "Release packaging"
-description: "Referencia técnica de Baldr sincronizada desde v0.20.0."
+description: "Baldr technical reference synchronized from v0.20.0."
 editUrl: false
 ---
 
-:::note[Fuente canónica · v0.20.0]
-Esta página se genera desde [`release-packaging.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/release-packaging.md). No la edites en este repositorio.
-Digest de la fuente: `91c5d64a79b9ae0744112d9497a25deda624746f8428ff39e32c32c0cae2a691`.
+:::note[Canonical source · v0.20.0]
+This page is generated from [`release-packaging.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/release-packaging.md). Do not edit it in this repository.
+Source digest: `91c5d64a79b9ae0744112d9497a25deda624746f8428ff39e32c32c0cae2a691`.
 :::
 v0.20.0 separates source, executable artifacts, and validation evidence.
 

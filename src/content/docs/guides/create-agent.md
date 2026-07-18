@@ -1,15 +1,15 @@
 ---
-title: Crear un agente
-description: Inicializar un agente Python o TypeScript con la API de autoría de Baldr.
+title: Create an agent
+description: Initialize a Python or TypeScript agent with Baldr's authoring API.
 ---
 
-## Requisitos
+## Requirements
 
-- Python 3.11 o posterior y `uv` para la toolchain;
-- Node.js 20 o posterior para agentes TypeScript;
-- `baldr-agent` y el driver del lenguaje disponibles.
+- Python 3.11 or later and `uv` for the toolchain;
+- Node.js 20 or later for TypeScript agents;
+- `baldr-agent` and the language driver available.
 
-## Inicializar
+## Initialize
 
 ### Python
 
@@ -31,9 +31,9 @@ baldr-agent init ./my-agent \
   --language typescript
 ```
 
-## Declarar roles
+## Declare roles
 
-`baldr-agent.toml` define identidad, lenguaje, entrypoint y uno o más roles:
+`baldr-agent.toml` defines identity, language, entrypoint, and one or more roles:
 
 ```toml
 schema_version = 2
@@ -51,7 +51,7 @@ capabilities = ["workspace.read", "workspace.write", "role.implementer"]
 effect_mode = "workspace-write"
 ```
 
-## Probar antes de construir
+## Test before building
 
 ```bash
 cd my-agent
@@ -60,7 +60,6 @@ baldr-agent driver doctor baldr.typescript
 baldr-agent driver conformance baldr.typescript
 ```
 
-La conformidad comprueba el proyecto real, no solamente que el ejecutable del
-driver responda.
+Conformance verifies the real project, not merely that the driver executable responds.
 
-Siguiente: [publicar una versión](../publish-agent/).
+Next: [publish a version](../publish-agent/).

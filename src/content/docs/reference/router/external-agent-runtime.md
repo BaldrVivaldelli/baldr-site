@@ -1,12 +1,12 @@
 ---
 title: "External agent runtime v1"
-description: "Referencia técnica de Baldr sincronizada desde v0.20.0."
+description: "Baldr technical reference synchronized from v0.20.0."
 editUrl: false
 ---
 
-:::note[Fuente canónica · v0.20.0]
-Esta página se genera desde [`external-agent-runtime.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/external-agent-runtime.md). No la edites en este repositorio.
-Digest de la fuente: `4a7582c9778c7fd33d4a4029259b46e4aed62bde47c57ccea29598f5186136ab`.
+:::note[Canonical source · v0.20.0]
+This page is generated from [`external-agent-runtime.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/external-agent-runtime.md). Do not edit it in this repository.
+Source digest: `4a7582c9778c7fd33d4a4029259b46e4aed62bde47c57ccea29598f5186136ab`.
 :::
 Baldr can coordinate agents whose code, prompts and release lifecycle remain in
 another repository. Baldr stores only their immutable identity and location;
@@ -115,8 +115,8 @@ baldr-agent publish
 baldr-agent doctor
 baldr-agent run \
   --role implementer \
-  --workspace /ruta/al/workspace \
-  --request "Generá el resultado"
+  --workspace /path/to/workspace \
+  --request "Generate the result"
 ```
 
 The generated `baldr-agent.toml` schema v2 declares exact identity, version,

@@ -1,0 +1,45 @@
+---
+title: Arquitectura interactiva
+description: Seguí la coordinación y publicación de un agente a través de las fronteras de Baldr.
+---
+
+import ArchitectureExplorer from '../../../components/ArchitectureExplorer.astro';
+
+Baldr separa dos ciclos: **diseñar y publicar** un agente, y **resolver y
+operar** ese release. El primero pertenece al equipo creador; el segundo es
+responsabilidad de la plataforma.
+
+<ArchitectureExplorer />
+
+## Los dos recorridos
+
+### Coordinar una tarea
+
+```text
+superficie -> Router -> Agent Manager -> Runner -> workspace -> evidencia
+```
+
+Router fija el workflow y el equipo. Agent Manager devuelve identidades
+exactas. Runner verifica y ejecuta. El resultado vuelve al estado durable y se
+proyecta hacia la superficie sin exponer razonamiento ni logs privados.
+
+### Publicar un agente
+
+```text
+repositorio -> SDK -> Agent Builder -> driver -> release inmutable
+```
+
+El checkout nunca se copia al Router. Builder produce un artefacto portable y
+manifiestos por rol. La publicación instala una versión estable que luego puede
+ser activada, auditada o revertida.
+
+## Tres planos
+
+| Plano | Contiene | No debería contener |
+| --- | --- | --- |
+| Control | workflows, políticas, identidad y decisiones | código privado del agente |
+| Data | procesos de Runner, límites y resultados | selección de producto |
+| Artefactos | releases, manifiestos y evidencia | referencias mutables a un checkout |
+
+Profundizá en los [componentes](/baldr-site/es/components/) o en la
+[referencia canónica](/baldr-site/es/reference/router/external-agent-runtime/).

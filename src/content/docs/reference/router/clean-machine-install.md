@@ -1,14 +1,14 @@
 ---
 title: "Clean-machine installation"
-description: "Referencia técnica de Baldr sincronizada desde v0.20.0."
+description: "Baldr technical reference synchronized from v0.20.0."
 editUrl: false
 ---
 
-:::note[Fuente canónica · v0.20.0]
-Esta página se genera desde [`clean-machine-install.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/clean-machine-install.md). No la edites en este repositorio.
-Digest de la fuente: `fb64e2dedf2bf530b73a8f945b76dce1315bb2a43db6bb823cd47d2125256612`.
+:::note[Canonical source · v0.20.0]
+This page is generated from [`clean-machine-install.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/clean-machine-install.md). Do not edit it in this repository.
+Source digest: `fb64e2dedf2bf530b73a8f945b76dce1315bb2a43db6bb823cd47d2125256612`.
 :::
-The VS Code facade is designed as **Instalación A UN SOLO clic con bootstrap automático**: installing the extension registers the MCP server, discovers the correct host/WSL environment, and prepares a private versioned Baldr runtime. Provider authentication and editor trust prompts remain explicit security consent, not manual configuration.
+The VS Code facade is designed as a **one-click installation with automatic bootstrap**: installing the extension registers the MCP server, discovers the correct host/WSL environment, and prepares a private versioned Baldr runtime. Provider authentication and editor trust prompts remain explicit security consent, not manual configuration.
 
 ## Prerequisites
 

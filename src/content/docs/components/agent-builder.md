@@ -1,10 +1,10 @@
 ---
 title: Agent Builder
-description: Toolchain neutral para probar, construir, publicar y revertir agentes.
+description: A language-neutral toolchain for testing, building, publishing, and rolling back agents.
 ---
 
-Agent Builder ofrece una experiencia común sin intentar implementar todos los
-compiladores dentro de Baldr.
+Agent Builder provides one consistent experience without trying to implement
+every compiler inside Baldr.
 
 ```bash
 baldr-agent test
@@ -16,17 +16,17 @@ baldr-agent rollback 1.0.0
 
 ## Builder Protocol
 
-Builder descubre un driver por identidad exacta y le envía operaciones JSONL
-versionadas. El driver conoce el lenguaje; Builder conoce el lifecycle.
+Builder discovers a driver by exact identity and sends it versioned JSONL
+operations. The driver understands the language; Builder owns the lifecycle.
 
-| Builder decide | Driver decide |
+| Builder decides | Driver decides |
 | --- | --- |
-| identidad del proyecto | cómo probar las fuentes |
-| inventario y digest de entrada | cómo producir el artefacto |
-| idempotencia y release | toolchain y formato de salida |
-| instalación y publicación | metadata específica del lenguaje |
+| project identity | how to test sources |
+| input inventory and digest | how to produce the artifact |
+| idempotency and release | toolchain and output format |
+| installation and publishing | language-specific metadata |
 
-La conformidad comprueba protocolo, tests reales, attestation, builds
-byte-idénticos y relocación fuera del checkout.
+Conformance verifies the protocol, real tests, attestation, byte-identical
+builds, and relocation outside the checkout.
 
-Siguiente: [crear un agente](/baldr-site/guides/create-agent/).
+Next: [create an agent](/baldr-site/guides/create-agent/).

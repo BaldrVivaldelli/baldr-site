@@ -1,41 +1,41 @@
 ---
-title: Publicar un agente
-description: Construir un artefacto reproducible y publicar una versión inmutable.
+title: Publish an agent
+description: Build a reproducible artifact and publish an immutable version.
 ---
 
-## Construir
+## Build
 
 ```bash
 baldr-agent build
 ```
 
-Builder inventaría las fuentes, calcula su digest y selecciona un driver exacto.
-El resultado debe ser portable y no conservar rutas al checkout, entornos
-virtuales o `node_modules` locales.
+Builder inventories sources, calculates their digest, and selects an exact
+driver. The result must be portable and must not retain paths to the checkout,
+virtual environments, or local `node_modules`.
 
-## Publicar
+## Publish
 
 ```bash
 baldr-agent publish
 baldr-agent doctor
 ```
 
-La publicación instala el artefacto en una ruta estable, genera un manifiesto
-por rol y activa las identidades en el catálogo local. Para Agent Manager:
+Publishing installs the artifact at a stable path, generates one manifest per
+role, and activates the identities in the local catalog. For Agent Manager:
 
 ```bash
 baldr-agent publish --catalog manager
 ```
 
-## Evolucionar
+## Evolve
 
-Si cambian fuentes, capacidades, roles, ownership o metadata, incrementá
-`version` en `baldr-agent.toml`. La versión anterior permanece disponible.
+If sources, capabilities, roles, ownership, or metadata change, increment
+`version` in `baldr-agent.toml`. The previous version remains available.
 
 ```bash
 baldr-agent rollback 1.0.0
 ```
 
-Rollback reactiva un release conocido; no reescribe su contenido.
+Rollback reactivates a known release; it does not rewrite its content.
 
-Siguiente: [ejecutar el agente](../run-agent/).
+Next: [run the agent](../run-agent/).

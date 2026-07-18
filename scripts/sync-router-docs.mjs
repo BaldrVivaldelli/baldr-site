@@ -16,7 +16,6 @@ const discoveredSource = sourceCandidates.find((candidate) =>
 const sourceRoot = path.resolve(
   process.env.BALDR_ROUTER_SOURCE ?? discoveredSource ?? sourceCandidates[0],
 );
-const targetRoot = path.join(root, config.targetDirectory);
 const checkOnly = process.argv.includes('--check');
 const knownDocuments = new Set(config.documents);
 
@@ -71,73 +70,119 @@ function rewriteLinks(markdown, sourceName) {
   });
 }
 
-function renderDocument(sourceName, source) {
-  const heading = source.match(/^#\s+(.+)$/m);
-  const title =
-    config.titleOverrides?.[sourceName] ??
-    heading?.[1]?.trim() ??
-    sourceName.replace(/\.md$/, '');
-  const body = heading ? source.replace(`${heading[0]}\n`, '') : source;
+function applyLocalizationReplacements(markdown, sourceName, locale) {
+  const replacements = config.localizationReplacements?.[locale]?.[sourceName] ?? {};
+  return Object.entries(replacements).reduce(
+    (content, [source, replacement]) => content.replaceAll(source, replacement),
+    markdown,
+  );
+}
+
+function renderDocument(sourceName, localizedSource, canonicalSource, locale) {
+  const heading = localizedSource.match(/^#\s+(.+)$/m);
+  const title = heading?.[1]?.trim() ?? sourceName.replace(/\.md$/, '');
+  const body = heading
+    ? localizedSource.replace(`${heading[0]}\n`, '')
+    : localizedSource;
   const sourceUrl = `${config.repository}/blob/${config.ref}/${config.sourceDirectory}/${sourceName}`;
-  const digest = createHash('sha256').update(source).digest('hex');
+  const digest = createHash('sha256').update(canonicalSource).digest('hex');
+  const copy = locale === 'es'
+    ? {
+        description: `Referencia técnica de Baldr sincronizada desde ${config.ref}.`,
+        note: `Fuente canónica · ${config.ref}`,
+        provenance: `Esta página se genera desde [\`${sourceName}\`](${sourceUrl}). No la edites en este repositorio.`,
+        digest: 'Digest de la fuente',
+      }
+    : {
+        description: `Baldr technical reference synchronized from ${config.ref}.`,
+        note: `Canonical source · ${config.ref}`,
+        provenance: `This page is generated from [\`${sourceName}\`](${sourceUrl}). Do not edit it in this repository.`,
+        digest: 'Source digest',
+      };
   const frontmatter = [
     '---',
     `title: ${JSON.stringify(title)}`,
-    `description: ${JSON.stringify(`Referencia técnica de Baldr sincronizada desde ${config.ref}.`)}`,
+    `description: ${JSON.stringify(copy.description)}`,
     'editUrl: false',
     '---',
     '',
-    `:::note[Fuente canónica · ${config.ref}]`,
-    `Esta página se genera desde [\`${sourceName}\`](${sourceUrl}). No la edites en este repositorio.`,
-    `Digest de la fuente: \`${digest}\`.`,
+    `:::note[${copy.note}]`,
+    copy.provenance,
+    `${copy.digest}: \`${digest}\`.`,
     ':::',
     '',
   ].join('\n');
   return `${frontmatter}${rewriteLinks(body, sourceName).trimStart()}`;
 }
 
-const expected = new Map();
+const canonicalSources = new Map();
 for (const sourceName of config.documents) {
   const sourcePath = path.posix.join(config.sourceDirectory, sourceName);
-  expected.set(sourceName, `${renderDocument(sourceName, gitShow(sourcePath)).trimEnd()}\n`);
+  canonicalSources.set(sourceName, gitShow(sourcePath));
 }
 
 let stale = false;
-for (const [targetName, content] of expected) {
-  const target = path.join(targetRoot, targetName);
-  let current = null;
+let documentCount = 0;
+for (const [locale, localeConfig] of Object.entries(config.locales)) {
+  const targetRoot = path.join(root, localeConfig.targetDirectory);
+  const expected = new Map();
+  for (const sourceName of config.documents) {
+    const canonicalSource = canonicalSources.get(sourceName);
+    const sourceLocale = config.sourceLocales[sourceName] ?? 'en';
+    const translationPath = path.join(root, localeConfig.translationsDirectory, sourceName);
+    let localizedSource = canonicalSource;
+    try {
+      localizedSource = await readFile(translationPath, 'utf8');
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error;
+      if (sourceLocale !== locale) {
+        throw new Error(`Missing ${locale} translation for ${sourceName}: ${translationPath}`);
+      }
+    }
+    localizedSource = applyLocalizationReplacements(localizedSource, sourceName, locale);
+    expected.set(
+      sourceName,
+      `${renderDocument(sourceName, localizedSource, canonicalSource, locale).trimEnd()}\n`,
+    );
+  }
+
+  for (const [targetName, content] of expected) {
+    const target = path.join(targetRoot, targetName);
+    let current = null;
+    try {
+      current = await readFile(target, 'utf8');
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error;
+    }
+    if (current === content) continue;
+    stale = true;
+    if (!checkOnly) {
+      await mkdir(path.dirname(target), { recursive: true });
+      await writeFile(target, content, 'utf8');
+    }
+  }
+
+  let existing = [];
   try {
-    current = await readFile(target, 'utf8');
+    existing = (await readdir(targetRoot)).filter((name) => name.endsWith('.md'));
   } catch (error) {
     if (error.code !== 'ENOENT') throw error;
   }
-  if (current === content) continue;
-  stale = true;
-  if (!checkOnly) {
-    await mkdir(path.dirname(target), { recursive: true });
-    await writeFile(target, content, 'utf8');
+  for (const targetName of existing) {
+    if (expected.has(targetName)) continue;
+    stale = true;
+    if (!checkOnly) await rm(path.join(targetRoot, targetName));
   }
-}
-
-let existing = [];
-try {
-  existing = (await readdir(targetRoot)).filter((name) => name.endsWith('.md'));
-} catch (error) {
-  if (error.code !== 'ENOENT') throw error;
-}
-for (const targetName of existing) {
-  if (expected.has(targetName)) continue;
-  stale = true;
-  if (!checkOnly) await rm(path.join(targetRoot, targetName));
+  documentCount += expected.size;
 }
 
 if (checkOnly && stale) {
   console.error(
-    `La referencia técnica no coincide con ${config.repository}@${config.ref}. Ejecutá npm run sync:router-docs.`,
+    `Technical references do not match ${config.repository}@${config.ref}. Run npm run sync:router-docs.`,
   );
   process.exitCode = 1;
 } else {
   console.log(
-    `${checkOnly ? 'Verificados' : 'Sincronizados'} ${expected.size} documentos desde ${config.ref}.`,
+    `${checkOnly ? 'Verified' : 'Synchronized'} ${documentCount} localized documents from ${config.ref}.`,
   );
 }

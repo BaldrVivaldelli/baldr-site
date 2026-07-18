@@ -9,9 +9,10 @@ export default defineConfig({
 		starlight({
 			title: 'Baldr',
 			description:
-				'Control plane local para coordinar agentes, herramientas y trabajo durable.',
+				'A local control plane for coordinating agents, tools, and durable work.',
 			locales: {
-				root: { label: 'Español', lang: 'es' },
+				root: { label: 'English', lang: 'en' },
+				es: { label: 'Español', lang: 'es' },
 			},
 			favicon: '/favicon.svg',
 			logo: {
@@ -22,7 +23,7 @@ export default defineConfig({
 			social: [
 				{
 					icon: 'github',
-					label: 'Baldr en GitHub',
+					label: 'Baldr on GitHub',
 					href: 'https://github.com/BaldrVivaldelli/baldr-router',
 				},
 			],
@@ -39,15 +40,21 @@ export default defineConfig({
 			],
 			sidebar: [
 				{
-					label: 'Explorar Baldr',
+					label: 'Explore Baldr',
+					translations: { es: 'Explorar Baldr' },
 					items: [
-						{ label: 'Qué es Baldr', slug: 'overview' },
-						{ label: 'Arquitectura interactiva', slug: 'explore' },
-						{ label: 'Componentes', slug: 'components' },
+						{ label: 'What is Baldr', translations: { es: 'Qué es Baldr' }, slug: 'overview' },
+						{
+							label: 'Interactive architecture',
+							translations: { es: 'Arquitectura interactiva' },
+							slug: 'explore',
+						},
+						{ label: 'Components', translations: { es: 'Componentes' }, slug: 'components' },
 					],
 				},
 				{
-					label: 'Componentes',
+					label: 'Components',
+					translations: { es: 'Componentes' },
 					items: [
 						{ label: 'Router', slug: 'components/router' },
 						{ label: 'Agent Manager', slug: 'components/agent-manager' },
@@ -57,44 +64,86 @@ export default defineConfig({
 					],
 				},
 				{
-					label: 'Conceptos',
+					label: 'Concepts',
+					translations: { es: 'Conceptos' },
 					items: [
-						{ label: 'Modelo conceptual', slug: 'concepts' },
-						{ label: 'Identidad inmutable', slug: 'concepts/identity' },
 						{
-							label: 'Capacidades y efectos',
+							label: 'Conceptual model',
+							translations: { es: 'Modelo conceptual' },
+							slug: 'concepts',
+						},
+						{
+							label: 'Immutable identity',
+							translations: { es: 'Identidad inmutable' },
+							slug: 'concepts/identity',
+						},
+						{
+							label: 'Capabilities and effects',
+							translations: { es: 'Capacidades y efectos' },
 							slug: 'concepts/capabilities-effects',
 						},
-						{ label: 'Workflows durables', slug: 'concepts/durable-workflows' },
+						{
+							label: 'Durable workflows',
+							translations: { es: 'Workflows durables' },
+							slug: 'concepts/durable-workflows',
+						},
 					],
 				},
 				{
-					label: 'Guías',
+					label: 'Guides',
+					translations: { es: 'Guías' },
 					items: [
-						{ label: 'Elegir un recorrido', slug: 'guides' },
-						{ label: 'Crear un agente', slug: 'guides/create-agent' },
-						{ label: 'Publicar un agente', slug: 'guides/publish-agent' },
-						{ label: 'Ejecutar con Baldr', slug: 'guides/run-agent' },
+						{
+							label: 'Choose a path',
+							translations: { es: 'Elegir un recorrido' },
+							slug: 'guides',
+						},
+						{
+							label: 'Create an agent',
+							translations: { es: 'Crear un agente' },
+							slug: 'guides/create-agent',
+						},
+						{
+							label: 'Publish an agent',
+							translations: { es: 'Publicar un agente' },
+							slug: 'guides/publish-agent',
+						},
+						{
+							label: 'Run with Baldr',
+							translations: { es: 'Ejecutar con Baldr' },
+							slug: 'guides/run-agent',
+						},
 					],
 				},
 				{
-					label: 'Integraciones',
+					label: 'Integrations',
+					translations: { es: 'Integraciones' },
 					items: [
-						{ label: 'Superficies disponibles', slug: 'integrations' },
+						{
+							label: 'Available surfaces',
+							translations: { es: 'Superficies disponibles' },
+							slug: 'integrations',
+						},
 						{ label: 'VS Code', slug: 'integrations/vscode' },
 						{ label: 'Kiro', slug: 'integrations/kiro' },
-						{ label: 'CLI y MCP', slug: 'integrations/cli-mcp' },
+						{ label: 'CLI and MCP', translations: { es: 'CLI y MCP' }, slug: 'integrations/cli-mcp' },
 					],
 				},
 				{
-					label: 'Referencia',
+					label: 'Reference',
+					translations: { es: 'Referencia' },
 					items: [
-						{ label: 'Documentación técnica', slug: 'reference' },
+						{
+							label: 'Technical documentation',
+							translations: { es: 'Documentación técnica' },
+							slug: 'reference',
+						},
 						{ autogenerate: { directory: 'reference/router' } },
 					],
 				},
 				{
-					label: 'Proyecto',
+					label: 'Project',
+					translations: { es: 'Proyecto' },
 					items: [{ label: 'Changelog', slug: 'changelog' }],
 				},
 			],

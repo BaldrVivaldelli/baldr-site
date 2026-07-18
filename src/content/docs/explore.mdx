@@ -1,45 +1,45 @@
 ---
-title: Arquitectura interactiva
-description: Seguí la coordinación y publicación de un agente a través de las fronteras de Baldr.
+title: Interactive architecture
+description: Follow agent coordination and publishing across Baldr's boundaries.
 ---
 
 import ArchitectureExplorer from '../../components/ArchitectureExplorer.astro';
 
-Baldr separa dos ciclos: **diseñar y publicar** un agente, y **resolver y
-operar** ese release. El primero pertenece al equipo creador; el segundo es
-responsabilidad de la plataforma.
+Baldr separates two cycles: **designing and publishing** an agent, and
+**resolving and operating** that release. The first belongs to the team that
+creates the agent; the second is the platform's responsibility.
 
 <ArchitectureExplorer />
 
-## Los dos recorridos
+## The two paths
 
-### Coordinar una tarea
-
-```text
-superficie -> Router -> Agent Manager -> Runner -> workspace -> evidencia
-```
-
-Router fija el workflow y el equipo. Agent Manager devuelve identidades
-exactas. Runner verifica y ejecuta. El resultado vuelve al estado durable y se
-proyecta hacia la superficie sin exponer razonamiento ni logs privados.
-
-### Publicar un agente
+### Coordinate a task
 
 ```text
-repositorio -> SDK -> Agent Builder -> driver -> release inmutable
+surface -> Router -> Agent Manager -> Runner -> workspace -> evidence
 ```
 
-El checkout nunca se copia al Router. Builder produce un artefacto portable y
-manifiestos por rol. La publicación instala una versión estable que luego puede
-ser activada, auditada o revertida.
+Router pins the workflow and team. Agent Manager returns exact identities.
+Runner verifies and executes. The result returns to durable state and is
+projected to the surface without exposing reasoning or private logs.
 
-## Tres planos
+### Publish an agent
 
-| Plano | Contiene | No debería contener |
+```text
+repository -> SDK -> Agent Builder -> driver -> immutable release
+```
+
+The checkout is never copied into Router. Builder produces a portable artifact
+and one manifest per role. Publishing installs a stable version that can later
+be activated, audited, or rolled back.
+
+## Three planes
+
+| Plane | Contains | Must not contain |
 | --- | --- | --- |
-| Control | workflows, políticas, identidad y decisiones | código privado del agente |
-| Data | procesos de Runner, límites y resultados | selección de producto |
-| Artefactos | releases, manifiestos y evidencia | referencias mutables a un checkout |
+| Control | workflows, policies, identity, and decisions | private agent code |
+| Data | Runner processes, limits, and results | product selection |
+| Artifacts | releases, manifests, and evidence | mutable checkout references |
 
-Profundizá en los [componentes](/baldr-site/components/) o en la
-[referencia canónica](/baldr-site/reference/router/external-agent-runtime/).
+Continue with the [components](/baldr-site/components/) or the
+[canonical reference](/baldr-site/reference/router/external-agent-runtime/).

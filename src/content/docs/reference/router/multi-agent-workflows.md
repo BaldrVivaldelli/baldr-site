@@ -1,12 +1,12 @@
 ---
 title: "Multi-agent workflows"
-description: "Referencia técnica de Baldr sincronizada desde v0.20.0."
+description: "Baldr technical reference synchronized from v0.20.0."
 editUrl: false
 ---
 
-:::note[Fuente canónica · v0.20.0]
-Esta página se genera desde [`multi-agent-workflows.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/multi-agent-workflows.md). No la edites en este repositorio.
-Digest de la fuente: `a34e5b01cf40f54e34aab83ff6db6a028e3b8e51357fd208133dd2d76cbe1d58`.
+:::note[Canonical source · v0.20.0]
+This page is generated from [`multi-agent-workflows.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/multi-agent-workflows.md). Do not edit it in this repository.
+Source digest: `a34e5b01cf40f54e34aab83ff6db6a028e3b8e51357fd208133dd2d76cbe1d58`.
 :::
 Baldr Router can coordinate several provider-backed roles without letting them talk directly to each other.
 

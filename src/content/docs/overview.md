@@ -1,60 +1,59 @@
 ---
-title: Qué es Baldr
-description: Una introducción al control plane local y a las fronteras de la plataforma.
+title: What is Baldr
+description: An introduction to the local control plane and the platform's boundaries.
 ---
 
-Baldr es un **control plane local para coordinar trabajo con agentes**. Puede
-usar Codex o Kiro directamente y también descubrir agentes externos escritos
-en diferentes lenguajes sin incorporar su código al Router.
+Baldr is a **local control plane for coordinating agent work**. It can use
+Codex or Kiro directly and discover external agents written in different
+languages without absorbing their code into Router.
 
-## El problema que resuelve
+## The problem it solves
 
-Crear una primera demostración de un agente es sencillo. Operarlo exige
-responder preguntas más difíciles:
+Building an agent demo is straightforward. Operating that agent requires
+answers to harder questions:
 
-- ¿qué versión exacta se ejecutó?;
-- ¿qué capacidades declaró y qué efectos recibió?;
-- ¿el artefacto ejecutado coincide con el que fue publicado?;
-- ¿cómo continúa el trabajo después de un reinicio?;
-- ¿cómo se revierte una actualización?;
-- ¿cómo usan el mismo agente VS Code, Kiro, una CLI o cualquier cliente MCP?
+- Which exact version ran?
+- Which capabilities did it declare, and which effects did it receive?
+- Does the executed artifact match the published one?
+- How does work continue after a restart?
+- How is an update rolled back?
+- How can VS Code, Kiro, a CLI, or any MCP client use the same agent?
 
-Baldr convierte esas preguntas en contratos, identidades y estados durables.
+Baldr turns those questions into contracts, identities, and durable state.
 
-## Lo que Baldr posee
+## What Baldr owns
 
-- coordinación de roles y fases;
-- resolución de participantes exactos;
-- políticas de capacidades y efectos;
-- ejecución mediante Runner;
-- reintentos, cancelación y reconciliación;
-- evidencia y progreso público acotado;
-- una superficie común para diferentes clientes.
+- role and phase coordination;
+- resolution of exact participants;
+- capability and effect policies;
+- execution through Runner;
+- retries, cancellation, and reconciliation;
+- evidence and bounded public progress;
+- a common surface for different clients.
 
-## Lo que permanece afuera
+## What remains outside
 
-- código y prompts privados de cada agente;
-- pruebas y dependencias del equipo propietario;
-- decisiones internas de lenguaje y framework;
-- calendario de release del producto;
-- secretos que el agente no declaró necesitar.
+- each agent's private code and prompts;
+- tests and dependencies owned by its team;
+- internal language and framework choices;
+- the product's release schedule;
+- secrets the agent did not declare it needs.
 
-:::tip[Una frase para recordarlo]
-Baldr posee la coordinación. Cada equipo posee el comportamiento.
+:::tip[One sentence to remember]
+Baldr owns coordination. Each team owns behavior.
 :::
 
-## Dos formas de usarlo
+## Two ways to use it
 
-### Providers normales
+### Standard providers
 
-Codex y Kiro pueden seguir ocupando roles de planificación, implementación y
-revisión. No hace falta crear un agente externo para obtener workflows
-durables.
+Codex and Kiro can continue to fill planning, implementation, and review
+roles. You do not need an external agent to use durable workflows.
 
-### Agentes externos
+### External agents
 
-Un equipo desarrolla con el SDK de su lenguaje, construye con Agent Builder y
-publica un release. Agent Manager resuelve su `AgentRef + digest`; Runner lo
-ejecuta cuando Router selecciona ese participante.
+A team develops with its language SDK, builds with Agent Builder, and publishes
+a release. Agent Manager resolves its `AgentRef + digest`; Runner executes it
+when Router selects that participant.
 
-El [explorador de arquitectura](/baldr-site/explore/) muestra ambos recorridos.
+The [architecture explorer](/baldr-site/explore/) shows both paths.

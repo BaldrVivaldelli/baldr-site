@@ -1,12 +1,12 @@
 ---
 title: "Kiro"
-description: "Referencia técnica de Baldr sincronizada desde v0.20.0."
+description: "Baldr technical reference synchronized from v0.20.0."
 editUrl: false
 ---
 
-:::note[Fuente canónica · v0.20.0]
-Esta página se genera desde [`kiro.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/kiro.md). No la edites en este repositorio.
-Digest de la fuente: `b8c3b67c3035ceeec7fbbd60915dd5c4d6bfaec2b55b3b27bff8b31e236aadcb`.
+:::note[Canonical source · v0.20.0]
+This page is generated from [`kiro.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/kiro.md). Do not edit it in this repository.
+Source digest: `b8c3b67c3035ceeec7fbbd60915dd5c4d6bfaec2b55b3b27bff8b31e236aadcb`.
 :::
 Kiro uses two thin pieces over the generic core:
 

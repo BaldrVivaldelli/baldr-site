@@ -1,29 +1,29 @@
 ---
-title: Ejecutar con Baldr
-description: Probar un release y asignarlo a un workflow coordinado por Router.
+title: Run with Baldr
+description: Test a release and assign it to a workflow coordinated by Router.
 ---
 
-## Smoke local del agente
+## Local agent smoke test
 
-Antes de incorporarlo a un equipo, ejecutá el rol mediante Runner:
+Before adding it to a team, execute the role through Runner:
 
 ```bash
 baldr-agent run \
   --role implementer \
-  --workspace /ruta/al/workspace \
-  --request "Generá el resultado solicitado"
+  --workspace /path/to/workspace \
+  --request "Generate the requested result"
 ```
 
-La operación construye e instala un release efímero, invoca el rol respetando
-su efecto declarado y limpia la instalación al terminar.
+The operation builds and installs an ephemeral release, invokes the role while
+respecting its declared effect, and cleans up the installation when finished.
 
-## Seleccionar desde una superficie
+## Select from a surface
 
-VS Code y Kiro consultan el catálogo compatible para cada fase. La interfaz
-muestra nombre humano, versión, estado y digest; la selección guarda el
-`AgentRef` exacto.
+VS Code and Kiro query the compatible catalog for each phase. The interface
+shows a human-friendly name, version, status, and digest; the selection stores
+the exact `AgentRef`.
 
-También podés combinar agentes externos y providers normales. Por ejemplo:
+You can also combine external agents and standard providers. For example:
 
 ```text
 architect   -> Codex
@@ -31,12 +31,12 @@ implementer -> local://product/repository-writer@1.0.0
 reviewer    -> Kiro
 ```
 
-## Qué observar
+## What to observe
 
-- la tarea conserva el equipo seleccionado;
-- cada fase muestra actividad y entregables;
-- el resultado enumera archivos agregados, modificados y eliminados;
-- una escritura incierta solicita reconciliación;
-- una versión ausente fijada explícitamente falla de forma visible.
+- the task preserves the selected team;
+- each phase shows activity and deliverables;
+- the result lists added, modified, and deleted files;
+- an uncertain write requests reconciliation;
+- an explicitly pinned missing version fails visibly.
 
-Para automatización consultá [CLI y MCP](/baldr-site/integrations/cli-mcp/).
+For automation, see [CLI and MCP](/baldr-site/integrations/cli-mcp/).

@@ -2,10 +2,45 @@
   "repository": "https://github.com/BaldrVivaldelli/baldr-router",
   "ref": "v0.20.0",
   "sourceDirectory": "docs",
-  "targetDirectory": "src/content/docs/reference/router",
-  "titleOverrides": {
-    "agentes-externos-necesitan-fronteras.md": "Agentes externos necesitan fronteras",
-    "consistency-operator-control.md": "Consistency and Operator Control"
+  "locales": {
+    "en": {
+      "targetDirectory": "src/content/docs/reference/router",
+      "translationsDirectory": "src/translations/router/en"
+    },
+    "es": {
+      "targetDirectory": "src/content/docs/es/reference/router",
+      "translationsDirectory": "src/translations/router/es"
+    }
+  },
+  "sourceLocales": {
+    "agentes-externos-necesitan-fronteras.md": "es",
+    "baldr-console.md": "es",
+    "consistency-operator-control.md": "es",
+    "durable-orchestration.md": "es",
+    "migration-0.20.md": "es",
+    "narrative-progress.md": "es"
+  },
+  "localizationReplacements": {
+    "en": {
+      "external-agent-http.md": {
+        "**Agentes externos**": "**External agents**",
+        "**Equipo de Baldr → Usar un agente externo registrado**": "**Baldr Team → Use a registered external agent**",
+        "**Equipo\nde Baldr → Administrar agentes externos**": "**Baldr Team → Manage external agents**",
+        "**Volver a Codex o Kiro normal**": "**Return to normal Codex or Kiro**"
+      },
+      "external-agent-runtime.md": {
+        "--workspace /ruta/al/workspace": "--workspace /path/to/workspace",
+        "--request \"Generá el resultado\"": "--request \"Generate the result\""
+      }
+    },
+    "es": {
+      "agentes-externos-necesitan-fronteras.md": {
+        "# Los agentes externos necesitan fronteras, no un orquestador más grande": "# Los agentes externos necesitan fronteras"
+      },
+      "consistency-operator-control.md": {
+        "# Consistency & Operator Control": "# Consistencia y control del operador"
+      }
+    }
   },
   "documents": [
     "agentes-externos-necesitan-fronteras.md",

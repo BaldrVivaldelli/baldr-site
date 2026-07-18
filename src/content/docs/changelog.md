@@ -1,35 +1,44 @@
 ---
 title: Changelog
-description: Evolución del sitio público de Baldr.
+description: Evolution of Baldr's public website.
 ---
 
-## 0.1.2 — Recorrido interactivo alineado
+## 0.2.0 — English-first bilingual documentation
 
-- Tarjetas de etapa uniformes y sin márgenes heredados de Markdown.
-- Carrusel adaptado al ancho real del componente, incluso dentro de la documentación.
-- Navegación visible con controles anterior y siguiente, contador y progreso.
-- Cambio de recorrido, panel y posición sincronizado al seleccionar una etapa.
-- Navegación por teclado y movimiento reducido respetados.
+- English is now the default language for the full website and documentation.
+- Spanish equivalents live under `/es/` and are reachable through the global language selector.
+- Interactive landing and architecture experiences share one locale-aware copy model.
+- Product guides, concepts, components, integrations, and navigation are paired across both languages.
+- Router technical references are generated in both languages from the same pinned tag and canonical digest.
+- Auditable translation sources normalize canonical documents that originally mixed languages.
 
-## 0.1.1 — Portada con una retícula de producto
+## 0.1.2 — Aligned interactive journey
 
-- Hero, mensaje principal y diagrama reunidos en una composición equilibrada.
-- Principios, recorrido y responsabilidades alineados sobre el mismo ancho.
-- Tarjetas uniformes y entradas organizadas por objetivo.
-- Navegación de arquitectura numerada y más legible.
-- Marca corregida para evitar duplicación y funcionar en temas claro y oscuro.
-- Composición responsive comprobada en escritorio y móvil.
+- Uniform stage cards without inherited Markdown margins.
+- Carousel based on the component's actual width, including documentation layouts.
+- Visible previous and next controls, step count, and progress.
+- Synchronized flow, panel, and position changes when selecting a stage.
+- Keyboard navigation and reduced-motion preferences respected.
 
-## 0.1.0 — Primera navegación pública
+## 0.1.1 — Product-grid landing page
 
-- Landing y explicación de la frontera de Baldr.
-- Explorador interactivo de coordinación y publicación.
-- Páginas de Router, Agent Manager, Runner, Agent Builder y SDKs.
-- Conceptos de identidad, capacidades, efectos y durabilidad.
-- Guías de creación, publicación y ejecución de agentes.
-- Integraciones de VS Code, Kiro, CLI y MCP.
-- Referencia técnica sincronizada desde `baldr-router@v0.20.0`.
-- CI, verificación de enlaces y despliegue de GitHub Pages.
+- Hero, primary message, and diagram combined in a balanced composition.
+- Principles, journey, and responsibilities aligned to the same width.
+- Uniform cards and entry points organized by goal.
+- Numbered and more readable architecture navigation.
+- Brand corrected to avoid duplication and work in light and dark themes.
+- Responsive composition verified on desktop and mobile.
 
-El changelog de la infraestructura permanece en
+## 0.1.0 — First public navigation
+
+- Landing page and explanation of Baldr's boundary.
+- Interactive coordination and publishing explorer.
+- Router, Agent Manager, Runner, Agent Builder, and SDK pages.
+- Identity, capability, effect, and durability concepts.
+- Agent creation, publishing, and execution guides.
+- VS Code, Kiro, CLI, and MCP integrations.
+- Technical reference synchronized from `baldr-router@v0.20.0`.
+- CI, link validation, and GitHub Pages deployment.
+
+The infrastructure changelog remains in
 [`baldr-router/CHANGELOG.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/main/CHANGELOG.md).

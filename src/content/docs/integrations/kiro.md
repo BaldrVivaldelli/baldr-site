@@ -1,27 +1,27 @@
 ---
 title: Kiro
-description: Power, adapter y acceso MCP al mismo Router.
+description: Power, adapter, and MCP access to the same Router.
 ---
 
-Kiro usa dos piezas deliberadamente delgadas:
+Kiro uses two deliberately thin pieces:
 
 ```text
 Kiro Power -> baldr-kiro-adapter -> baldr-router MCP
 ```
 
-El Power aporta la experiencia de Kiro y puede traducir tareas de Specs. El
-adapter materializa hooks y compatibilidad específica de forma idempotente. El
-workflow real continúa en Router.
+Power provides the Kiro experience and can translate Spec tasks. The adapter
+materializes hooks and specific compatibility idempotently. The real workflow
+remains in Router.
 
-## Configuración MCP
+## MCP configuration
 
-Una instalación puede exponer el launcher como servidor `baldr-router`. La ruta
-exacta depende del entorno host/WSL y de cómo se distribuyó el runtime.
+An installation can expose the launcher as the `baldr-router` server. The exact
+path depends on the host/WSL environment and how the runtime was distributed.
 
-## Agentes externos
+## External agents
 
-Kiro consulta los mismos participantes publicados que VS Code. Seleccionar un
-agente guarda una referencia inmutable; no copia su archivo de configuración al
-Power.
+Kiro queries the same published participants as VS Code. Selecting an agent
+stores an immutable reference; it does not copy the agent's configuration file
+into Power.
 
-Referencia exacta: [Kiro](/baldr-site/reference/router/kiro/).
+Exact reference: [Kiro](/baldr-site/reference/router/kiro/).

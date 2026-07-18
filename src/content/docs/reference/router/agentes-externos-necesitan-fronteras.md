@@ -1,126 +1,119 @@
 ---
-title: "Agentes externos necesitan fronteras"
-description: "Referencia técnica de Baldr sincronizada desde v0.20.0."
+title: "External agents need boundaries, not a larger orchestrator"
+description: "Baldr technical reference synchronized from v0.20.0."
 editUrl: false
 ---
 
-:::note[Fuente canónica · v0.20.0]
-Esta página se genera desde [`agentes-externos-necesitan-fronteras.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/agentes-externos-necesitan-fronteras.md). No la edites en este repositorio.
-Digest de la fuente: `a66cd2bc2724a928bd6410a9dd404e574e31a594de8b0ce08ac0d25fd0257927`.
+:::note[Canonical source · v0.20.0]
+This page is generated from [`agentes-externos-necesitan-fronteras.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/agentes-externos-necesitan-fronteras.md). Do not edit it in this repository.
+Source digest: `a66cd2bc2724a928bd6410a9dd404e574e31a594de8b0ce08ac0d25fd0257927`.
 :::
-Los modelos de lenguaje permiten crear agentes con mucha rapidez. El problema
-difícil aparece después: identificarlos, construirlos de forma reproducible,
-darles solamente los permisos necesarios, coordinarlos desde distintas
-superficies y poder actualizar o revertir una versión sin perder trazabilidad.
-La evolución de Baldr muestra por qué un orquestador no debería apropiarse del
-código de los agentes, sino ofrecer contratos estables para descubrirlos,
-resolverlos y ejecutarlos.
+Language models make it possible to create agents very quickly. The difficult
+problem comes next: identifying them, building them reproducibly, granting only
+the permissions they need, coordinating them from different surfaces, and
+updating or reverting a version without losing traceability. Baldr's evolution
+shows why an orchestrator should not take ownership of agent code. Instead, it
+should provide stable contracts to discover, resolve, and execute agents.
 
-**18 de julio de 2026**
-
----
-
-**Autor:** Equipo Baldr
-
-Este artículo cuenta las decisiones de diseño detrás de la plataforma de
-agentes externos de Baldr. No reemplaza la especificación de
-[External Agent Runtime](../external-agent-runtime/) ni la de
-[Builder Protocol](../builder-protocol/); explica por qué esas fronteras existen
-y qué aprendimos al construir un vertical real en Python y TypeScript.
-
-## Contenido
-
-- [El problema empieza después de la primera demostración](#el-problema-empieza-después-de-la-primera-demostración)
-- [Por qué no poner los agentes dentro de Baldr](#por-qué-no-poner-los-agentes-dentro-de-baldr)
-- [La arquitectura se descubrió construyendo un caso real](#la-arquitectura-se-descubrió-construyendo-un-caso-real)
-- [Un modelo semántico para hablar de agentes](#un-modelo-semántico-para-hablar-de-agentes)
-- [Builder Protocol como frontera políglota](#builder-protocol-como-frontera-políglota)
-- [Ejemplo: un agente TypeScript de punta a punta](#ejemplo-un-agente-typescript-de-punta-a-punta)
-- [Coordinar no es lo mismo que ejecutar](#coordinar-no-es-lo-mismo-que-ejecutar)
-- [Identidad inmutable en lugar de nombres ambiguos](#identidad-inmutable-en-lugar-de-nombres-ambiguos)
-- [Los permisos son parte del tipo del agente](#los-permisos-son-parte-del-tipo-del-agente)
-- [Dos etapas distintas de trabajo](#dos-etapas-distintas-de-trabajo)
-- [Qué debe ser Baldr y qué conviene dejar afuera](#qué-debe-ser-baldr-y-qué-conviene-dejar-afuera)
-- [Costos y límites de esta arquitectura](#costos-y-límites-de-esta-arquitectura)
-- [El siguiente paso](#el-siguiente-paso)
-- [Conclusión](#conclusión)
+**July 18, 2026**
 
 ---
 
-Los agentes suelen comenzar como una función que recibe una instrucción, llama
-a un modelo y devuelve una respuesta. Esa forma es suficiente para explorar
-una idea. También oculta casi todas las decisiones que aparecen cuando el
-agente empieza a trabajar sobre repositorios reales.
+**Author:** Baldr Team
 
-¿Qué versión se ejecutó? ¿Quién publicó esa versión? ¿Puede leer o también
-escribir? ¿El artefacto que corre es el mismo que fue revisado? ¿Qué pasa si el
-proceso se interrumpe después de modificar un archivo? ¿Cómo usa el mismo
-agente una extensión de VS Code, Kiro o una CLI? ¿Cómo se vuelve a la versión
-anterior?
+This article explains the design decisions behind Baldr's external-agent
+platform. It does not replace the [External Agent Runtime](../external-agent-runtime/)
+or [Builder Protocol](../builder-protocol/) specifications. It explains why
+those boundaries exist and what we learned while building a real vertical in
+Python and TypeScript.
 
-Estas preguntas no se resuelven agregando instrucciones al prompt. Requieren
-identidad, contratos, límites de efectos, persistencia y un ciclo de release.
+## Contents
 
-## El problema empieza después de la primera demostración
+- [The problem starts after the first demo](#the-problem-starts-after-the-first-demo)
+- [Why agents should not live inside Baldr](#why-agents-should-not-live-inside-baldr)
+- [The architecture emerged from a real use case](#the-architecture-emerged-from-a-real-use-case)
+- [A semantic model for talking about agents](#a-semantic-model-for-talking-about-agents)
+- [Builder Protocol as a polyglot boundary](#builder-protocol-as-a-polyglot-boundary)
+- [Example: an end-to-end TypeScript agent](#example-an-end-to-end-typescript-agent)
+- [Coordination is not execution](#coordination-is-not-execution)
+- [Immutable identity instead of ambiguous names](#immutable-identity-instead-of-ambiguous-names)
+- [Permissions are part of the agent's type](#permissions-are-part-of-the-agents-type)
+- [Two distinct stages of work](#two-distinct-stages-of-work)
+- [What Baldr should own and what should remain outside](#what-baldr-should-own-and-what-should-remain-outside)
+- [Costs and limits of this architecture](#costs-and-limits-of-this-architecture)
+- [The next step](#the-next-step)
+- [Conclusion](#conclusion)
 
-Un prototipo puede apuntar directamente a un archivo Python, un script
-TypeScript o una configuración local. La ubicación funciona como identidad y
-el entorno del desarrollador completa implícitamente todo lo que falta. El
-agente encuentra dependencias porque el checkout está presente, hereda las
-credenciales de la terminal y escribe porque el proceso tiene acceso al mismo
-workspace que la persona.
+---
 
-Esa comodidad se transforma en ambigüedad cuando el agente se comparte:
+Agents often begin as a function that receives an instruction, calls a model,
+and returns a response. That is enough to explore an idea. It also hides almost
+every decision that appears when the agent starts working on real repositories.
 
-- una ruta local no representa una versión;
-- el mismo nombre puede resolver contenidos diferentes;
-- un build puede depender accidentalmente de `node_modules`, un entorno
-  virtual o archivos del monorepo;
-- el permiso efectivo depende del proceso que inició al agente;
-- una actualización puede reemplazar silenciosamente el comportamiento que
-  estaba en uso;
-- una interfaz puede mostrar un agente disponible aunque su artefacto ya no
-  exista.
+Which version ran? Who published it? Can it read, or can it write too? Is the
+artifact that runs the same one that was reviewed? What happens if the process
+is interrupted after modifying a file? How can VS Code, Kiro, or a CLI use the
+same agent? How do you return to the previous version?
 
-La tentación inicial es incorporar todo al orquestador: copiar los agentes al
-repositorio principal, sumar sus prompts a la configuración central y darles
-acceso a las mismas herramientas. Esto reduce la fricción durante unos días,
-pero hace que cada agente nuevo amplíe el núcleo, el ciclo de release y la
-superficie de confianza del producto completo.
+These questions are not solved by adding instructions to a prompt. They
+require identity, contracts, effect boundaries, persistence, and a release cycle.
 
-> **Idea central:** crear un agente puede ser fácil; operarlo como una unidad
-> identificable, reemplazable y limitada es un problema de plataforma.
+## The problem starts after the first demo
 
-## Por qué no poner los agentes dentro de Baldr
+A prototype can point directly to a Python file, TypeScript script, or local
+configuration. Location acts as identity, while the developer's environment
+implicitly supplies everything that is missing. The agent finds dependencies
+because the checkout is present, inherits terminal credentials, and writes
+because its process can access the same workspace as the person.
 
-Baldr coordina trabajo. Los equipos que crean agentes son dueños de su código,
-sus pruebas, su lenguaje y su calendario de publicación. Mezclar esas dos
-responsabilidades produciría un monolito organizacional antes que uno
-puramente técnico.
+That convenience becomes ambiguity when the agent is shared:
 
-Si los agentes vivieran dentro de Baldr, el Router tendría que conocer:
+- a local path does not represent a version;
+- the same name can resolve to different content;
+- a build can accidentally depend on `node_modules`, a virtual environment, or
+  monorepo files;
+- effective permission depends on the process that started the agent;
+- an update can silently replace behavior currently in use;
+- an interface can show an agent as available even when its artifact no longer exists.
 
-- la estructura de cada proyecto;
-- las dependencias y herramientas de cada lenguaje;
-- los prompts y reglas privadas de cada equipo;
-- la forma de construir y probar cada artefacto;
-- el ritmo de actualización de todos los agentes;
-- secretos o recursos específicos de productos que Baldr no debería poseer.
+The initial temptation is to incorporate everything into the orchestrator:
+copy agents into the main repository, add their prompts to central
+configuration, and grant them the same tools. This reduces friction for a few
+days, but every new agent then expands the core, the release cycle, and the
+trust surface of the entire product.
 
-La alternativa es que Baldr conozca únicamente aquello que necesita para
-coordinar: una identidad exacta, capacidades declaradas, modo de efectos,
-ubicación estable, digest del manifiesto y un protocolo de ejecución.
+> **Core idea:** creating an agent can be easy; operating it as an
+> identifiable, replaceable, and bounded unit is a platform problem.
+
+## Why agents should not live inside Baldr
+
+Baldr coordinates work. The teams that create agents own their code, tests,
+language, and publishing schedule. Mixing those responsibilities would create
+an organizational monolith before it created a purely technical one.
+
+If agents lived inside Baldr, Router would need to understand:
+
+- every project's structure;
+- every language's dependencies and tools;
+- each team's private prompts and rules;
+- how to build and test every artifact;
+- every agent's update cadence;
+- secrets or resources specific to products Baldr should not own.
+
+The alternative is for Baldr to know only what coordination requires: an exact
+identity, declared capabilities, effect mode, stable location, manifest digest,
+and execution protocol.
 
 ```text
-equipo propietario                     infraestructura Baldr
+owning team                           Baldr infrastructure
 
-código + pruebas
+code + tests
       |
       v
-SDK del lenguaje
+language SDK
       |
       v
-Agent Builder + driver  ------->  artefacto + manifiestos
+Agent Builder + driver  ------->  artifact + manifests
                                          |
                                          v
                                    Agent Manager
@@ -131,97 +124,87 @@ Agent Builder + driver  ------->  artefacto + manifiestos
                                 Router -> Runner
                                          |
                                          v
-                               workspace autorizado
+                                authorized workspace
 ```
 
-Esta separación permite que un agente se desarrolle en otro repositorio sin
-convertirse en un plugin cargado dentro del proceso del Router. Baldr conserva
-el control de coordinación y política; el equipo conserva la propiedad del
-comportamiento.
+This separation lets an agent be developed in another repository without
+becoming a plugin loaded into Router's process. Baldr retains control of
+coordination and policy; the team retains ownership of behavior.
 
-## La arquitectura se descubrió construyendo un caso real
+## The architecture emerged from a real use case
 
-La separación anterior parece simple cuando se dibuja terminada. No surgió de
-definir todas las interfaces por adelantado. Apareció al intentar ejecutar el
-mismo agente desde un repositorio externo y en dos lenguajes.
+The separation looks simple once it is drawn. It did not come from defining
+every interface in advance. It emerged while trying to run the same agent from
+an external repository in two languages.
 
-El primer corte funcional reveló varias responsabilidades que al principio
-estaban mezcladas:
+The first functional slice revealed responsibilities that were initially mixed:
 
-1. El SDK debía ofrecer la API que importa el agente, sin incorporar la
-   toolchain de publicación.
-2. Agent Builder debía conocer el proyecto y su ciclo de release, pero no
-   implementar internamente todos los lenguajes.
-3. Cada driver debía transformar fuentes en un artefacto reproducible mediante
-   un contrato común.
-4. Agent Manager debía almacenar y resolver identidades, no ejecutar código.
-5. Runner debía ejecutar el artefacto fuera del proceso del Router y aplicar
-   límites de datos y efectos.
-6. Router debía coordinar fases durables y seleccionar participantes exactos.
+1. The SDK had to expose the API imported by the agent without incorporating
+   the publishing toolchain.
+2. Agent Builder had to understand the project and release lifecycle without
+   implementing every language internally.
+3. Each driver had to transform sources into a reproducible artifact through a
+   common contract.
+4. Agent Manager had to store and resolve identities, not execute code.
+5. Runner had to execute the artifact outside Router and apply data and effect limits.
+6. Router had to coordinate durable phases and select exact participants.
 
-El agente piloto TypeScript fue especialmente útil. Mientras el driver solo se
-ejecutaba desde el monorepo, parecía independiente. Al instalarlo globalmente
-desde un tarball apareció una dependencia oculta: el digest del driver incluía
-rutas absolutas y cambiaba según el directorio de instalación. La solución no
-fue documentar una ruta recomendada, sino redefinir la identidad sobre nombres
-lógicos y contenido.
+The TypeScript pilot agent was especially useful. While the driver ran only
+from the monorepo, it appeared independent. Installing it globally from a
+tarball exposed a hidden dependency: the driver digest included absolute paths
+and changed with the installation directory. The solution was not to document
+a recommended path, but to redefine identity over logical names and content.
 
-Ese defecto era pequeño, pero mostró una regla general: una frontera no es real
-hasta que funciona sin el checkout que la originó.
+The defect was small, but it demonstrated a general rule: a boundary is not
+real until it works without the checkout that created it.
 
-## Un modelo semántico para hablar de agentes
+## A semantic model for talking about agents
 
-Antes de la plataforma externa, palabras como “agente”, “modelo”, “rol” y
-“provider” podían superponerse. Para coordinar agentes publicados se necesitó
-un vocabulario más preciso.
+Before the external platform, words such as “agent,” “model,” “role,” and
+“provider” could overlap. Coordinating published agents required a more precise vocabulary.
 
-El modelo de Baldr distingue:
+Baldr's model distinguishes:
 
-- **rol:** responsabilidad dentro de una fase, como planificación, ejecución o
-  revisión;
-- **AgentRef:** identidad versionada del participante;
-- **digest del manifiesto:** identidad del contenido declarado;
-- **artefacto:** programa autocontenido que ejecutará el Runner;
-- **capacidad:** acción que el agente afirma poder realizar;
-- **modo de efectos:** frontera operacional, por ejemplo `read-only` o
-  `workspace-write`;
-- **driver:** implementación de build para un lenguaje;
-- **release:** combinación inmutable de definición, artefacto y manifiestos;
-- **resolución de equipo:** decisión durable que asigna identidades exactas a
-  los roles de un workflow.
+- **role:** responsibility within a phase, such as planning, execution, or review;
+- **AgentRef:** versioned participant identity;
+- **manifest digest:** identity of the declared content;
+- **artifact:** self-contained program executed by Runner;
+- **capability:** action the agent claims it can perform;
+- **effect mode:** operational boundary, such as `read-only` or `workspace-write`;
+- **driver:** build implementation for one language;
+- **release:** immutable combination of definition, artifact, and manifests;
+- **team resolution:** durable decision that assigns exact identities to workflow roles.
 
-Una referencia típica tiene esta forma:
+A typical reference looks like this:
 
 ```text
 local://personal/repository-report-typescript-writer@1.0.0
 ```
 
-El nombre ayuda a una persona, pero no alcanza para ejecutar. La resolución
-también fija el digest del manifiesto. El workflow conserva ambas piezas y no
-vuelve a interpretar “la última versión” a mitad de una sesión.
+The name helps a person, but is not enough to execute. Resolution also pins the
+manifest digest. The workflow preserves both pieces and does not reinterpret
+“the latest version” halfway through a session.
 
 ```text
-AgentRef exacto + digest exacto + capacidades + efectos
+exact AgentRef + exact digest + capabilities + effects
                          |
                          v
-               participante durable
+               durable participant
 ```
 
-Este modelo semántico reduce la cantidad de decisiones abiertas para las
-fachadas. VS Code y Kiro no necesitan entender cómo se construyó un agente
-TypeScript. Solo necesitan presentar opciones compatibles y enviar a Baldr la
-identidad seleccionada.
+This semantic model reduces the open decisions left to facades. VS Code and
+Kiro do not need to understand how a TypeScript agent was built. They only need
+to present compatible options and send Baldr the selected identity.
 
-## Builder Protocol como frontera políglota
+## Builder Protocol as a polyglot boundary
 
-Un SDK políglota no resuelve por sí mismo un build políglota. Python puede
-producir un `.pyz`; TypeScript puede producir un `.cjs`; Rust podría producir
-un binario. Sus toolchains, inventarios y diagnósticos son diferentes.
+A polyglot SDK does not by itself solve polyglot builds. Python can produce a
+`.pyz`; TypeScript can produce a `.cjs`; Rust could produce a binary. Their
+toolchains, inventories, and diagnostics differ.
 
-Implementar todas esas decisiones dentro de Agent Builder volvería a crear el
-acoplamiento que queríamos evitar. Builder Protocol introduce una frontera
-neutral entre el ciclo de desarrollo y la herramienta específica del
-lenguaje.
+Implementing every decision inside Agent Builder would recreate the coupling
+we wanted to avoid. Builder Protocol introduces a neutral boundary between the
+development lifecycle and the language-specific tool.
 
 ```text
 baldr-agent test/build/publish
@@ -229,35 +212,34 @@ baldr-agent test/build/publish
               v
        Builder Protocol v1
               |
-       selección por identidad
+       identity-based selection
               |
-              +----> driver Python
-              +----> driver TypeScript
-              +----> futuro driver Rust
+              +----> Python driver
+              +----> TypeScript driver
+              +----> future Rust driver
 ```
 
-El driver anuncia una identidad que incluye id, versión y digest. Agent Builder
-lo descubre desde una registración explícita o mediante un ejecutable acotado
-en `PATH`. Después intercambia solicitudes y respuestas JSONL versionadas.
+The driver announces an identity containing id, version, and digest. Agent
+Builder discovers it from explicit registration or through a bounded executable
+in `PATH`. They then exchange versioned JSONL requests and responses.
 
-El protocolo no intenta uniformar los compiladores. Uniforma aquello que
-Builder necesita comprobar:
+The protocol does not try to standardize compilers. It standardizes what
+Builder must verify:
 
-- qué operación se solicitó;
-- sobre qué inventario de fuentes;
-- qué versión de driver la realizó;
-- qué artefacto produjo;
-- cuál es su digest;
-- qué metadata debe acompañar al release;
-- si una repetición representa el mismo trabajo.
+- which operation was requested;
+- which source inventory it used;
+- which driver version performed it;
+- which artifact it produced;
+- the artifact's digest;
+- which metadata accompanies the release;
+- whether a repetition represents the same work.
 
-El JSON es un formato de transporte, no el modelo completo. La semántica está
-en el contrato versionado, las validaciones y las invariantes que rodean al
-mensaje.
+JSON is a transport format, not the complete model. Semantics live in the
+versioned contract, validation, and invariants around the message.
 
-## Ejemplo: un agente TypeScript de punta a punta
+## Example: an end-to-end TypeScript agent
 
-El flujo comienza en el repositorio del equipo, no en Baldr:
+The flow starts in the team's repository, not in Baldr:
 
 ```bash
 baldr-agent init ./repository-report \
@@ -273,7 +255,7 @@ baldr-agent publish
 baldr-agent doctor
 ```
 
-El proyecto declara su lenguaje, entrypoint, driver y roles en
+The project declares its language, entrypoint, driver, and roles in
 `baldr-agent.toml`:
 
 ```toml
@@ -292,9 +274,9 @@ capabilities = ["workspace.read", "workspace.write", "role.implementer"]
 effect_mode = "workspace-write"
 ```
 
-El código importa solamente el SDK de autoría. El fragmento siguiente abrevia
-el `final_report`; un agente real completa los campos narrativos y de evidencia
-definidos por el contrato del rol:
+The code imports only the authoring SDK. The following fragment abbreviates
+`final_report`; a real agent completes the narrative and evidence fields
+defined by the role contract:
 
 ```ts
 import { Agent } from "@baldr/agent-sdk";
@@ -306,13 +288,13 @@ const agent = new Agent({
 });
 
 agent.invoke(async (request, context) => {
-  context.emit("analyzing", "Revisando el repositorio");
-  // El comportamiento pertenece al repositorio del agente.
+  context.emit("analyzing", "Reviewing the repository");
+  // Behavior belongs to the agent repository.
   return {
     ok: true,
     final_report: {
       status: "implemented",
-      summary: "El reporte fue generado",
+      summary: "The report was generated",
     },
   };
 });
@@ -320,38 +302,38 @@ agent.invoke(async (request, context) => {
 process.exitCode = await agent.serveStdio();
 ```
 
-Durante `build`, el driver TypeScript genera un `.cjs` autocontenido. Dos
-builds con las mismas fuentes deben producir los mismos bytes. Durante
-`publish`, Agent Builder instala el artefacto en una ubicación estable, genera
-los manifiestos de planner, writer y reviewer, y publica esas identidades en el
-catálogo local o en Agent Manager.
+During `build`, the TypeScript driver produces a self-contained `.cjs`. Two
+builds from the same sources must produce the same bytes. During `publish`,
+Agent Builder installs the artifact at a stable location, generates planner,
+writer, and reviewer manifests, and publishes those identities to the local
+catalog or Agent Manager.
 
-El código del agente nunca se copia al Router. Lo que cruza la frontera es un
-release identificable.
+The agent's code is never copied into Router. What crosses the boundary is an
+identifiable release.
 
-## Coordinar no es lo mismo que ejecutar
+## Coordination is not execution
 
-Separar Router y Runner evita que el control plane se convierta en el lugar
-donde corre código de terceros.
+Separating Router and Runner prevents the control plane from becoming the
+place where third-party code runs.
 
-Router decide:
+Router decides:
 
-- qué workflow está activo;
-- qué rol debe ejecutarse;
-- qué identidad exacta ocupa ese rol;
-- qué capacidades permite la fase;
-- qué hacer ante reintentos, cancelaciones o resultados inciertos;
-- qué progreso durable puede mostrarse a la persona.
+- which workflow is active;
+- which role must run;
+- which exact identity fills that role;
+- which capabilities the phase allows;
+- what to do on retries, cancellation, or uncertain results;
+- which durable progress can be shown to the person.
 
-Runner decide:
+Runner decides:
 
-- cómo verificar el artefacto inmediatamente antes de ejecutarlo;
-- qué directorio recibe el proceso;
-- qué entorno mínimo puede heredar;
-- cómo limitar tiempo y tamaño de entrada/salida;
-- cómo persistir estado y eventos privados;
-- cómo terminar el grupo de procesos;
-- cuándo una interrupción de escritura debe marcarse como `unknown`.
+- how to verify the artifact immediately before execution;
+- which directory the process receives;
+- which minimal environment it can inherit;
+- how to limit time and input/output size;
+- how to persist private state and events;
+- how to terminate the process group;
+- when a write interruption must be marked `unknown`.
 
 ```mermaid
 sequenceDiagram
@@ -359,201 +341,188 @@ sequenceDiagram
     participant R as Baldr Router
     participant M as Agent Manager
     participant X as Agent Runner
-    participant A as Artefacto externo
+    participant A as External artifact
 
-    UI->>R: ejecutar tarea
-    R->>M: resolver rol y capacidades
-    M-->>R: AgentRef + digest + ubicación
-    R->>X: invocación durable y workspace autorizado
-    X->>X: verificar digest y límites
-    X->>A: ejecutar contrato agent-execution-v1
-    A-->>X: eventos privados + resultado
-    X-->>R: resultado terminal verificado
-    R-->>UI: progreso y resultado narrativo
+    UI->>R: run task
+    R->>M: resolve role and capabilities
+    M-->>R: AgentRef + digest + location
+    R->>X: durable invocation and authorized workspace
+    X->>X: verify digest and limits
+    X->>A: execute agent-execution-v1 contract
+    A-->>X: private events + result
+    X-->>R: verified terminal result
+    R-->>UI: progress and narrative result
 ```
 
-Esta separación también deja abierta la evolución del data plane. Un futuro
-Runner podría usar contenedores o jobs remotos sin cambiar la forma en que el
-workflow fija identidades y resultados.
+This separation also leaves room for the data plane to evolve. A future Runner
+could use containers or remote jobs without changing how workflows pin
+identities and results.
 
-## Identidad inmutable en lugar de nombres ambiguos
+## Immutable identity instead of ambiguous names
 
-Una versión publicada no puede aceptar contenido diferente. Si el código, los
-roles, las capacidades o los manifiestos cambian, la versión debe cambiar.
+A published version cannot accept different content. If code, roles,
+capabilities, or manifests change, the version must change.
 
-La inmutabilidad aporta tres propiedades:
+Immutability provides three properties:
 
-1. **Repetición segura.** Publicar otra vez exactamente el mismo release es
-   idempotente.
-2. **Auditoría.** Una sesión durable puede demostrar qué manifiesto y artefacto
-   utilizó.
-3. **Rollback.** Volver a `1.0.0` significa reactivar una identidad conocida,
-   no reconstruir aproximadamente un estado anterior.
+1. **Safe repetition.** Publishing the exact same release again is idempotent.
+2. **Auditability.** A durable session can prove which manifest and artifact it used.
+3. **Rollback.** Returning to `1.0.0` reactivates a known identity instead of
+   approximately rebuilding a previous state.
 
 ```text
-1.0.0 + digest A  -> válido
-1.0.0 + digest A  -> repetición idempotente
-1.0.0 + digest B  -> rechazado; requiere nueva versión
-1.1.0 + digest B  -> válido
+1.0.0 + digest A  -> valid
+1.0.0 + digest A  -> idempotent repetition
+1.0.0 + digest B  -> rejected; requires a new version
+1.1.0 + digest B  -> valid
 ```
 
-El digest no reemplaza a la versión. La versión comunica intención y evolución
-a las personas; el digest prueba contenido a las máquinas. Baldr necesita
-ambos.
+The digest does not replace the version. The version communicates intent and
+evolution to people; the digest proves content to machines. Baldr needs both.
 
-## Los permisos son parte del tipo del agente
+## Permissions are part of the agent's type
 
-Un agente no debería recibir permisos solamente porque la aplicación que lo
-invocó puede escribir. El manifiesto declara capacidades y la fase declara qué
-efectos acepta. El permiso efectivo es la intersección de ambas cosas.
+An agent should not receive permissions merely because the invoking
+application can write. The manifest declares capabilities, and the phase
+declares which effects it accepts. Effective permission is their intersection.
 
-Para planificación y revisión, Runner crea una copia descartable y reducida:
-sin metadata Git, dependencias generadas, symlinks ni entradas especiales. El
-agente puede observar, pero no recibe la ruta original.
+For planning and review, Runner creates a reduced disposable copy without Git
+metadata, generated dependencies, symlinks, or special entries. The agent can
+observe, but does not receive the original path.
 
-Para implementación, Baldr entrega el workspace exacto únicamente cuando:
+For implementation, Baldr provides the exact workspace only when:
 
-- el rol requiere escritura;
-- el manifiesto declara `workspace.write`;
-- el modo de efectos es `workspace-write`;
-- el workspace ya fue confiado por la superficie;
-- la política conserva un único escritor para esa fase.
+- the role requires writing;
+- the manifest declares `workspace.write`;
+- effect mode is `workspace-write`;
+- the surface already trusted the workspace;
+- policy preserves a single writer for the phase.
 
-Esto evita dos extremos igualmente problemáticos: bloquear siempre la
-escritura aunque ya esté autorizada, o confiar en cualquier agente porque fue
-seleccionado desde una interfaz local.
+This avoids two equally problematic extremes: always blocking writes that are
+already authorized, or trusting any agent merely because it was selected from
+a local interface.
 
-También cambia la semántica de los fallos. Interrumpir una lectura permite un
-reintento normal. Interrumpir una escritura puede dejar efectos parciales; por
-eso el resultado pasa a `unknown` y requiere reconciliación durable.
+It also changes failure semantics. Interrupting a read allows a normal retry.
+Interrupting a write can leave partial effects, so the result becomes `unknown`
+and requires durable reconciliation.
 
-## Dos etapas distintas de trabajo
+## Two distinct stages of work
 
-La plataforma expone dos ciclos que conviene no mezclar.
+The platform exposes two cycles that should not be mixed.
 
-### Diseñar y publicar el agente
+### Design and publish the agent
 
-En esta etapa el equipo explora el comportamiento, cambia el código, mejora
-pruebas y descubre qué capacidades necesita. El SDK aporta vocabulario; Agent
-Builder y el driver aportan validación y reproducibilidad.
+In this stage, the team explores behavior, changes code, improves tests, and
+discovers which capabilities it needs. The SDK provides vocabulary; Agent
+Builder and the driver provide validation and reproducibility.
 
-El proceso es deliberadamente iterativo:
+The process is deliberately iterative:
 
 ```text
-idea -> implementación -> test -> build -> inspección -> nueva versión
+idea -> implementation -> test -> build -> inspection -> new version
 ```
 
-Baldr no debería intentar decidir la arquitectura interna del agente. Ese
-diseño pertenece al equipo que lo mantiene.
+Baldr should not try to decide the agent's internal architecture. That design
+belongs to the team that maintains it.
 
-### Resolver y operar el agente
+### Resolve and operate the agent
 
-Una vez publicado, la relación cambia. El workflow no recibe “el agente más
-nuevo” como una sugerencia abierta: recibe una identidad compatible, verifica
-su estado y la fija para la sesión.
+Once published, the relationship changes. The workflow does not receive “the
+newest agent” as an open suggestion. It receives a compatible identity,
+verifies its state, and pins it for the session.
 
 ```text
-descubrimiento -> resolución -> ejecución -> evidencia -> actualización/rollback
+discovery -> resolution -> execution -> evidence -> update/rollback
 ```
 
-Aquí la creatividad importa menos que la previsibilidad. Las decisiones deben
-ser determinísticas, explicables y recuperables después de un reinicio.
+Creativity matters less than predictability here. Decisions must be
+deterministic, explainable, and recoverable after a restart.
 
-Separar estas etapas permite que el desarrollo sea flexible sin convertir la
-operación en algo ambiguo.
+Separating these stages lets development remain flexible without making
+operations ambiguous.
 
-## Qué debe ser Baldr y qué conviene dejar afuera
+## What Baldr should own and what should remain outside
 
-Baldr debería ser responsable de:
+Baldr should own:
 
-- contratos e identidades;
-- descubrimiento y resolución de equipos;
-- políticas de capacidades y efectos;
-- workflows durables;
-- ejecución aislada mediante Runner;
-- evidencia, diagnóstico y recuperación;
-- superficies consistentes para VS Code, Kiro, CLI y MCP.
+- contracts and identities;
+- team discovery and resolution;
+- capability and effect policies;
+- durable workflows;
+- isolated execution through Runner;
+- evidence, diagnostics, and recovery;
+- consistent surfaces for VS Code, Kiro, CLI, and MCP.
 
-Baldr no debería ser responsable de:
+Baldr should not own:
 
-- almacenar el código fuente de todos los agentes;
-- imponer un lenguaje de programación;
-- centralizar los prompts privados de cada producto;
-- reconstruir internamente todas las toolchains;
-- entregar automáticamente todos los secretos del usuario;
-- reemplazar el sistema de versionado del equipo propietario;
-- decidir silenciosamente qué versión nueva sustituye a una sesión activa.
+- the source code of every agent;
+- a mandatory programming language;
+- every product's private prompts;
+- every toolchain rebuilt internally;
+- automatic access to all user secrets;
+- the owning team's versioning system;
+- a silent decision that replaces an active session with a new version.
 
-La diferencia puede resumirse así: Baldr posee la coordinación; cada equipo
-posee el comportamiento.
+The distinction is simple: Baldr owns coordination; each team owns behavior.
 
-## Costos y límites de esta arquitectura
+## Costs and limits of this architecture
 
-Las fronteras explícitas no son gratuitas. La plataforma incorpora más
-conceptos, paquetes y contratos que una llamada directa a un script.
+Explicit boundaries are not free. The platform introduces more concepts,
+packages, and contracts than a direct script call.
 
-Hay costos concretos:
+The costs are concrete:
 
-- SDK, Builder, drivers y Runner deben versionarse de manera compatible;
-- los contratos necesitan suites de conformidad;
-- un artefacto autocontenido puede ser más grande;
-- la publicación exige disciplina semántica;
-- los diagnósticos deben explicar fallos distribuidos entre control plane y
-  data plane;
-- las garantías locales no equivalen automáticamente a aislamiento fuerte por
-  contenedor o máquina virtual;
-- la ejecución remota necesitará autenticación, tenancy y manejo de secretos
-  más avanzados.
+- SDK, Builder, drivers, and Runner must evolve compatibly;
+- contracts need conformance suites;
+- a self-contained artifact can be larger;
+- publishing requires semantic discipline;
+- diagnostics must explain failures distributed across control and data planes;
+- local guarantees do not automatically equal strong container or VM isolation;
+- remote execution will require more advanced authentication, tenancy, and secret handling.
 
-Tampoco todo agente necesita esta plataforma. Un script personal descartable
-puede seguir siendo un script. La inversión se justifica cuando el agente se
-comparte, cambia con el tiempo, opera sobre datos relevantes o debe ejecutarse
-desde más de una superficie.
+Not every agent needs this platform. A disposable personal script can remain a
+script. The investment is justified when an agent is shared, changes over
+time, operates on relevant data, or must run from more than one surface.
 
-La señal para adoptar estas fronteras no es la complejidad del prompt, sino la
-necesidad de responder con precisión quién ejecutó qué, con qué permisos y con
-qué resultado.
+The signal for adopting these boundaries is not prompt complexity. It is the
+need to answer precisely who executed what, with which permissions, and with
+which result.
 
-## El siguiente paso
+## The next step
 
-La arquitectura ya demuestra el vertical Python y TypeScript. La próxima
-mejora no debería ser agregar más tipos de orquestación, sino reducir la
-distancia entre una instalación limpia y la primera ejecución útil.
+The architecture already demonstrates the Python and TypeScript vertical. The
+next improvement should not be more orchestration types, but a shorter path
+from a clean installation to the first useful execution.
 
-Un objetivo concreto sería que una persona pueda:
+A concrete goal is to let a person:
 
-1. instalar Agent Builder y un driver publicado;
-2. crear un agente con un comando;
-3. probarlo y construirlo sin conocer el checkout de Baldr;
-4. ejecutarlo localmente antes de publicar;
-5. publicar una versión inmutable;
-6. seleccionarla desde VS Code o Kiro con un nombre humano;
-7. observar el resultado y hacer rollback;
-8. repetir todo el flujo mediante un smoke test documentado.
+1. install Agent Builder and a published driver;
+2. create an agent with one command;
+3. test and build it without knowing the Baldr checkout;
+4. execute it locally before publishing;
+5. publish an immutable version;
+6. select it by a human name in VS Code or Kiro;
+7. observe the result and roll back;
+8. repeat the full flow through a documented smoke test.
 
-La suite de conformidad para drivers será importante en esa etapa. Un driver
-nuevo debería demostrar descubrimiento, digest estable, protocolo válido,
-build reproducible, cancelación, ausencia de rutas locales y compatibilidad con
-Runner antes de anunciarse como disponible.
+The driver conformance suite will be important at this stage. A new driver
+should prove discovery, stable digest, valid protocol, reproducible build,
+cancellation, absence of local paths, and Runner compatibility before it is
+announced as available.
 
-## Conclusión
+## Conclusion
 
-Los LLM aceleran la creación del comportamiento de un agente, pero no eliminan
-la necesidad de diseñar el sistema que lo rodea. Cuanto más fácil resulta
-generar agentes, más importante se vuelve disponer de fronteras que permitan
-operarlos sin ampliar indefinidamente el núcleo del orquestador.
+LLMs accelerate the creation of agent behavior, but do not eliminate the need
+to design the surrounding system. The easier it becomes to generate agents,
+the more important it becomes to operate them without indefinitely expanding
+the orchestrator's core.
 
-Baldr trata a los agentes externos como releases pertenecientes a otros
-equipos. SDK ofrece el vocabulario de autoría. Agent Builder y sus drivers
-convierten fuentes en artefactos reproducibles. Agent Manager resuelve
-identidades inmutables. Runner ejecuta bajo una frontera explícita. Router
-coordina el trabajo durable desde las superficies existentes.
+Baldr treats external agents as releases owned by other teams. SDK provides the
+authoring vocabulary. Agent Builder and its drivers turn sources into
+reproducible artifacts. Agent Manager resolves immutable identities. Runner
+executes behind an explicit boundary. Router coordinates durable work from the
+existing surfaces.
 
-El resultado no es solamente soporte para más lenguajes. Es una división de
-responsabilidades que permite que el ecosistema crezca sin que Baldr tenga que
-incorporar cada agente dentro de sí mismo.
-
-
-## Revisiones significativas
-
-- **18 de julio de 2026:** primera publicación.
+The result is not merely support for more languages. It is a division of
+responsibilities that lets the ecosystem grow without requiring Baldr to
+absorb every agent into itself.

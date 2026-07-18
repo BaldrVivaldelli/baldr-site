@@ -1,12 +1,12 @@
 ---
 title: "Architecture"
-description: "Referencia técnica de Baldr sincronizada desde v0.20.0."
+description: "Baldr technical reference synchronized from v0.20.0."
 editUrl: false
 ---
 
-:::note[Fuente canónica · v0.20.0]
-Esta página se genera desde [`architecture.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/architecture.md). No la edites en este repositorio.
-Digest de la fuente: `d420b1380e326bc237780bc913a36a66583e373af908bd3cf8bd6a7aaf258923`.
+:::note[Canonical source · v0.20.0]
+This page is generated from [`architecture.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/architecture.md). Do not edit it in this repository.
+Source digest: `d420b1380e326bc237780bc913a36a66583e373af908bd3cf8bd6a7aaf258923`.
 :::
 ## Product center
 
@@ -39,11 +39,7 @@ It defines three stable user intents:
 - `status`: compact health and recent-run report;
 - `run`: execute the frozen orchestration workflow.
 
-Conversation continuation is an internal action of `run`, not a fourth facade
-intent. A durable work item owns immutable request turns; each continuation
-increments the item revision, starts a related run, and carries forward only a
-bounded allowlist from the previous structured final report plus the new
-private client context.
+Conversation continuation is an internal action of `run`, not a fourth facade intent. A durable work item owns immutable request turns; each continuation increments the item revision, starts a related run, and carries forward only a bounded allowlist from the previous structured final report plus the new private client context.
 
 Generated facade files are synchronized by `scripts/generate_facades.py`. CI-style validation uses `--check`.
 
@@ -92,11 +88,7 @@ VS Code extension
 
 The extension invokes the same core CLI facade and also registers the same MCP server for the general VS Code agent.
 
-The VS Code facade resolves workspace identity from explicit Chat references,
-the active editor, a previously pinned root, or an explicit multi-root picker.
-It captures bounded editor/selection/dirty-buffer/diagnostic context into
-private artifacts. The public workbench exposes ordered request turns and a
-context-presence flag, never the private context body.
+The VS Code facade resolves workspace identity from explicit Chat references, the active editor, a previously pinned root, or an explicit multi-root picker. It captures bounded editor/selection/dirty-buffer/diagnostic context into private artifacts. The public workbench exposes ordered request turns and a context-presence flag, never the private context body.
 
 ## Kiro facade
 
@@ -112,14 +104,13 @@ Kiro-specific hook materialization remains outside the core and is idempotent.
 
 The Agent Plugin contains only slash-command prompt files and an MCP declaration. It is a secondary, preview distribution path and reuses the same contract.
 
-
 ## Durable control, code, and artifact planes
 
 v0.16 keeps orchestration deterministic in Baldr and treats provider output as external effects:
 
 ```text
 control plane   -> SQLite state machine + append-only event journal
-code plane      -> autorización + escritura puntual + checkpoints durables
+code plane      -> authorization + targeted writes + durable checkpoints
 artifact plane  -> content-addressed reports, patches, telemetry and evidence
 ```
 
@@ -127,19 +118,19 @@ The workflow snapshot freezes the resolved execution profiles, provider/model se
 
 Each phase references one or many named execution profiles. A single shared profile can back all phases, or architecture/implementation/review can independently use n/m/l profiles. Provider sessions are keyed by scope, workspace/run, role, provider, model/agent, and profile.
 
-El code plane usa **Trabajar directamente** por defecto sin cambiar el alcance elegido por el usuario:
+The code plane uses **Work directly** by default without changing the scope selected by the user:
 
 ```text
-arquitectura
-  -> sandbox de solo lectura sobre el workspace elegido
+architecture
+  -> read-only sandbox over the selected workspace
 
-implementación
-  -> sandbox workspace-write sobre ese mismo workspace + journal durable
+implementation
+  -> workspace-write sandbox over that same workspace + durable journal
 ```
 
-Todos los providers reciben sólo la ruta seleccionada. La arquitectura no puede escribir; la implementación escribe directamente y el reviewer comprueba el estado visible en la misma carpeta. `automatic` conserva la pausa opcional para quien la elija explícitamente. Los attempts, leases, checkpoints y eventos permanecen durables; una escritura interrumpida con efectos desconocidos exige reconciliación y nunca se repite automáticamente.
+All providers receive only the selected path. Architecture cannot write; implementation writes directly and the reviewer checks the visible state in the same folder. `automatic` keeps the optional pause for users who explicitly choose it. Attempts, leases, checkpoints, and events remain durable; an interrupted write with unknown effects requires reconciliation and is never retried automatically.
 
-Los worktrees y shadows siguen disponibles para runs aislados existentes o configuraciones avanzadas. En esos modos, los manifests, blobs y journals conservan sus garantías de publicación y recuperación, pero no forman parte del camino predeterminado autorizado.
+Worktrees and shadows remain available for existing isolated runs or advanced configurations. In those modes, manifests, blobs, and journals keep their publication and recovery guarantees, but they are not part of the default authorized path.
 
 See [`durable-orchestration.md`](../durable-orchestration/) and [`consistency-operator-control.md`](../consistency-operator-control/).
 
@@ -155,4 +146,4 @@ Providers never call one another directly. Baldr owns the conversation state and
 
 ## Freeze boundary
 
-v0.16 adds fencing, strict idempotency/resume, durable cancellation and operator reconciliation on top of durable SQLite orchestration while retaining validation/probe/evidence hardening and keeps the functional surface frozen. The functional surface remains frozen to the existing providers, roles, and workflow described in `FEATURE_FREEZE.md`.
+v0.16 adds fencing, strict idempotency/resume, durable cancellation, and operator reconciliation on top of durable SQLite orchestration while retaining validation/probe/evidence hardening and keeping the functional surface frozen. The functional surface remains frozen to the existing providers, roles, and workflow described in `FEATURE_FREEZE.md`.

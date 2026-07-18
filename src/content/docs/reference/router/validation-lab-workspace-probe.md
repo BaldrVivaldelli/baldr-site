@@ -1,12 +1,12 @@
 ---
 title: "v0.14 Validation Lab, Workspace Probe, and Evidence"
-description: "Referencia técnica de Baldr sincronizada desde v0.20.0."
+description: "Baldr technical reference synchronized from v0.20.0."
 editUrl: false
 ---
 
-:::note[Fuente canónica · v0.20.0]
-Esta página se genera desde [`validation-lab-workspace-probe.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/validation-lab-workspace-probe.md). No la edites en este repositorio.
-Digest de la fuente: `6336b2bb9aeec506fb46838b2355cf6d1599f8c6b7520e937c583db2144ca08e`.
+:::note[Canonical source · v0.20.0]
+This page is generated from [`validation-lab-workspace-probe.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/validation-lab-workspace-probe.md). Do not edit it in this repository.
+Source digest: `6336b2bb9aeec506fb46838b2355cf6d1599f8c6b7520e937c583db2144ca08e`.
 :::
 Baldr v0.14 adds three hardening layers without changing the frozen MCP tool, provider, role, or workflow surface.
 

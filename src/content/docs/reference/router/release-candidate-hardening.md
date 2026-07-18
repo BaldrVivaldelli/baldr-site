@@ -1,12 +1,12 @@
 ---
 title: "v0.13 Release Candidate Hardening"
-description: "Referencia técnica de Baldr sincronizada desde v0.20.0."
+description: "Baldr technical reference synchronized from v0.20.0."
 editUrl: false
 ---
 
-:::note[Fuente canónica · v0.20.0]
-Esta página se genera desde [`release-candidate-hardening.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/release-candidate-hardening.md). No la edites en este repositorio.
-Digest de la fuente: `35ca0b24bf4f2ca77aa9a4bed2b98b357bed9465edbb1f72f622448c6537b952`.
+:::note[Canonical source · v0.20.0]
+This page is generated from [`release-candidate-hardening.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/release-candidate-hardening.md). Do not edit it in this repository.
+Source digest: `35ca0b24bf4f2ca77aa9a4bed2b98b357bed9465edbb1f72f622448c6537b952`.
 :::
 Baldr Router v0.13 keeps the v0.12 feature surface frozen. This release changes reliability, packaging, safety, diagnostics, and test coverage only. It does **not** add providers, roles, workflows, or public MCP tools.
 

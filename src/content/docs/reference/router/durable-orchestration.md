@@ -1,17 +1,17 @@
 ---
 title: "Durable Baldr-led Orchestration"
-description: "Referencia técnica de Baldr sincronizada desde v0.20.0."
+description: "Baldr technical reference synchronized from v0.20.0."
 editUrl: false
 ---
 
-:::note[Fuente canónica · v0.20.0]
-Esta página se genera desde [`durable-orchestration.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/durable-orchestration.md). No la edites en este repositorio.
-Digest de la fuente: `813483b4b2661bbc60d5e23e05fc400ab494df5b9e01d0a1ecac1b26c6d47c06`.
+:::note[Canonical source · v0.20.0]
+This page is generated from [`durable-orchestration.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/durable-orchestration.md). Do not edit it in this repository.
+Source digest: `813483b4b2661bbc60d5e23e05fc400ab494df5b9e01d0a1ecac1b26c6d47c06`.
 :::
-Baldr v0.16 convierte el workflow congelado `architect-implement-review` en una máquina de estados durable. Los modelos o agentes aportan razonamiento; Baldr conserva el control operativo.
+Baldr v0.16 turns the frozen `architect-implement-review` workflow into a durable state machine. Models or agents provide reasoning; Baldr retains operational control.
 
 ```text
-cliente MCP
+MCP client
   -> Baldr durable workflow engine
       -> architecture phase
       -> implementation phase
@@ -19,11 +19,11 @@ cliente MCP
       -> bounded fix/review rounds
 ```
 
-Los participantes no se invocan directamente. Baldr selecciona perfiles, persiste cada transición, transmite artifacts estructurados y decide cuándo reintentar, pausar, reconciliar o completar.
+Participants are not invoked directly. Baldr selects profiles, persists each transition, transmits structured artifacts, and decides when to retry, pause, reconcile, or complete.
 
-## Perfiles de ejecución abstractos
+## Abstract execution profiles
 
-Baldr no codifica nombres concretos de modelos. Un perfil describe cómo ejecutar una participación:
+Baldr does not hardcode specific model names. A profile describes how to execute a participation:
 
 ```toml
 [execution_profiles.shared]
@@ -33,7 +33,7 @@ reasoning_effort = ""
 session_scope = "workspace"
 ```
 
-Los campos vacíos heredan los defaults del provider. El mismo perfil puede respaldar las tres fases:
+Empty fields inherit provider defaults. The same profile can back all three phases:
 
 ```toml
 [roles.architect]
@@ -46,7 +46,7 @@ profiles = ["shared"]
 profiles = ["shared"]
 ```
 
-También se admite una cantidad independiente de perfiles por fase: `n` para arquitectura, `m` para implementación y `l` para revisión.
+An independent number of profiles per phase is also supported: `n` for architecture, `m` for implementation, and `l` for review.
 
 ```toml
 [execution_profiles.architecture-primary]
@@ -105,50 +105,47 @@ max_participants_per_phase = 8
 max_total_participant_attempts = 24
 ```
 
-Reglas:
+Rules:
 
-- `first-success` prueba perfiles en orden hasta obtener un resultado válido;
-- `all` ejecuta en paralelo los perfiles de sólo lectura, con concurrencia acotada, y consolida sus resultados en el orden configurado;
-- una fase con escritura debe resolver a exactamente un participante, independientemente de la estrategia;
-- `max_participants_per_phase` acota el fan-out y `max_total_participant_attempts` incluye fallbacks, rondas y reintentos durables;
-- si un participante de lectura falla, los demás pueden satisfacer `min_successes`/`min_approvals`; el fallo queda persistido como evidencia;
-- la cancelación se comprueba mientras Baldr espera participantes paralelos, termina procesos hijos y finaliza el run con fencing durable;
-- la precedencia es override de la ejecución, perfil del rol y finalmente default del provider;
-- el snapshot resuelto se congela al crear el workflow, por lo que un upgrade de configuración no cambia una ejecución ya iniciada.
+- `first-success` tries profiles in order until it obtains a valid result;
+- `all` runs read-only profiles in parallel with bounded concurrency and consolidates their results in configured order;
+- a write phase must resolve to exactly one participant, regardless of strategy;
+- `max_participants_per_phase` bounds fan-out and `max_total_participant_attempts` includes fallbacks, rounds, and durable retries;
+- if a read participant fails, the others may satisfy `min_successes`/`min_approvals`; the failure is persisted as evidence;
+- cancellation is checked while Baldr waits for parallel participants, terminates child processes, and finishes the run with durable fencing;
+- precedence is execution override, role profile, then provider default;
+- the resolved snapshot is frozen when the workflow is created, so a configuration upgrade does not change an already-started execution.
 
-La política congelada implementa
-[`orchestration-policy-v1.schema.json`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/contracts/orchestration-policy-v1.schema.json)
-y declara los límites, la cardinalidad por rol y la regla
-`exactly-one-per-write-phase`.
+The frozen policy implements [`orchestration-policy-v1.schema.json`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/contracts/orchestration-policy-v1.schema.json) and declares limits, per-role cardinality, and the `exactly-one-per-write-phase` rule.
 
-## Tres planos de durabilidad
+## Three durability planes
 
 ```text
 Control plane
   SQLite
 
 Code plane
-  Git worktree o workspace sombra + checkpoints + publicación idempotente
+  Git worktree or shadow workspace + checkpoints + idempotent publication
 
 Artifact plane
-  outputs/evidence content-addressed
+  content-addressed outputs/evidence
 ```
 
 ### SQLite
 
-Ruta por defecto:
+Default path:
 
 ```text
 Linux/WSL:
   ~/.local/state/baldr-router/baldr.sqlite3
 
-Windows nativo:
-  directorio de estado local de Baldr
+Native Windows:
+  Baldr local state directory
 ```
 
-La base debe vivir en el filesystem local del runtime, no en una ruta de red ni en `/mnt/c` cuando Baldr corre dentro de WSL.
+The database must live on the runtime's local filesystem, not a network path or `/mnt/c` when Baldr runs inside WSL.
 
-Configuración:
+Configuration:
 
 ```toml
 [durability]
@@ -163,21 +160,21 @@ artifact_inline_limit_bytes = 32768
 retain_terminal_days = 90
 ```
 
-SQLite mantiene:
+SQLite maintains:
 
-- estado materializado de runs, steps, participants y attempts;
-- journal append-only de eventos;
-- leases y heartbeats;
-- sesiones de provider;
-- checkpoints de workspace;
-- referencias a artifacts y evidence;
-- snapshot inmutable de la configuración resuelta.
+- materialized state for runs, steps, participants, and attempts;
+- append-only event journal;
+- leases and heartbeats;
+- provider sessions;
+- workspace checkpoints;
+- artifact and evidence references;
+- immutable snapshot of the resolved configuration.
 
-Las migraciones son monotónicas y llevan checksum. Modificar una migración ya aplicada hace fallar el arranque en vez de alterar silenciosamente el historial.
+Migrations are monotonic and checksummed. Modifying an already-applied migration causes startup to fail instead of silently altering history.
 
-## Máquina de estados
+## State machine
 
-Estados relevantes del workflow:
+Relevant workflow states:
 
 ```text
 pending
@@ -193,44 +190,44 @@ failed
 cancelled
 ```
 
-Cada transición actualiza el estado materializado y agrega un evento dentro de la misma transacción SQLite.
+Each transition updates materialized state and appends an event within the same SQLite transaction.
 
-Los efectos externos no pueden formar parte de esa transacción. Por eso Baldr no promete `exactly once`; implementa:
+External effects cannot be part of that transaction. Baldr therefore does not promise `exactly once`; it implements:
 
 ```text
-at-least-once controlado
+controlled at-least-once
 + idempotency keys
 + reconciliation
-+ checkpoints verificables
++ verifiable checkpoints
 ```
 
-`unknown` significa que un proceso externo pudo haber producido efectos antes de perderse la confirmación durable.
+`unknown` means that an external process may have produced effects before durable confirmation was lost.
 
-## Leases, heartbeat y recovery
+## Leases, heartbeat, and recovery
 
-Cada workflow activo tiene un owner, una expiración y un `lease_epoch` monotónico. Mientras un provider corre, Baldr renueva el lease del workflow y del intento. Cada takeover incrementa el epoch; toda mutación posterior exige el mismo owner/epoch dentro de la transacción, por lo que un worker obsoleto no puede confirmar un resultado después de perder el lease.
+Each active workflow has an owner, expiration, and monotonic `lease_epoch`. While a provider runs, Baldr renews both workflow and attempt leases. Each takeover increments the epoch; every later mutation requires the same owner/epoch within the transaction, so a stale worker cannot confirm a result after losing the lease.
 
-Al arrancar:
+At startup Baldr:
 
-1. busca leases vencidos;
-2. clasifica los pasos activos;
-3. un paso read-only pasa a `interrupted` y puede reintentarse;
-4. un paso con escritura pasa a `unknown`;
-5. el workflow con efectos de escritura inciertos pasa a `awaiting_reconciliation` y no se reintenta ciegamente.
+1. finds expired leases;
+2. classifies active steps;
+3. moves a read-only step to `interrupted`, where it may be retried;
+4. moves a write step to `unknown`;
+5. moves a workflow with uncertain write effects to `awaiting_reconciliation` and does not retry it blindly.
 
-Una ejecución reanudada usa el snapshot original de perfiles, límites, sandbox y versión del workflow, incluso si la configuración actual cambió. El resume también queda ligado a la ruta original y, según el modo, a la identidad Git o al manifest y la política del workspace sombra. Mover el run, reemplazar el repo o alterar el estado durable se rechaza.
+A resumed execution uses the original snapshot of profiles, limits, sandbox, and workflow version even if the current configuration changed. Resume is also bound to the original path and, depending on mode, the Git identity or the shadow workspace manifest and policy. Moving the run, replacing the repository, or altering durable state is rejected.
 
-## Sesiones persistentes por perfil
+## Persistent sessions per profile
 
-Las sesiones no se comparten indiscriminadamente. La key incluye:
+Sessions are not shared indiscriminately. The key includes:
 
 ```text
 scope + workspace/run + role + provider + model/agent + profile
 ```
 
-Por ejemplo, arquitectura e implementación pueden usar el mismo provider pero conservar threads distintos. En scope `workspace`, un workflow posterior puede reanudar el thread correspondiente al mismo rol/modelo/perfil.
+For example, architecture and implementation can use the same provider while retaining different threads. Under `workspace` scope, a later workflow can resume the corresponding thread for the same role/model/profile.
 
-Los resultados estructurados, no la memoria implícita del thread, son el contrato entre fases:
+Structured results, not implicit thread memory, are the contract between phases:
 
 ```text
 architecture artifact
@@ -238,97 +235,97 @@ implementation report
 review report
 ```
 
-## Escritura autorizada y aislamiento compatible
+## Authorized writing and compatible isolation
 
-`Trabajar directamente` (`current`) es el modo recomendado y predeterminado. Baldr conserva exactamente el alcance que eligió la persona:
+**Work directly** (`current`) is the recommended and default mode. Baldr preserves exactly the scope selected by the user:
 
 ```text
-arquitectura en solo lectura sobre la carpeta seleccionada
-  -> implementación directa con workspace-write
-  -> revisión del diff y de las verificaciones
+read-only architecture over the selected folder
+  -> direct implementation with workspace-write
+  -> review of the diff and verifications
 ```
 
-No hay una publicación posterior desde una copia completa. Cada cambio aparece directamente en el workspace activo, como en Codex/Kiro, sin una pausa de autorización por tarea. Los cambios independientes de la persona pueden convivir con la ejecución; Git, los checkpoints y el journal registran los efectos observados. Si un intento de escritura se interrumpe antes de confirmar su resultado, Baldr lo deja `unknown` y exige reconciliación en vez de repetirlo.
+There is no later publication from a complete copy. Every change appears directly in the active workspace, as in Codex/Kiro, without a per-task authorization pause. The user's independent changes can coexist with execution; Git, checkpoints, and the journal record observed effects. If a write attempt is interrupted before confirming its result, Baldr leaves it `unknown` and requires reconciliation instead of repeating it.
 
-`automatic` conserva el flujo opcional que pide permiso antes de la primera escritura. `non-git` permite escritura directa en una carpeta confiable sin exigir Git y conserva su confirmación explícita. Arquitectura continúa con sandbox `read-only`; implementación y fixes reciben `workspace-write` únicamente cuando el modo ya lo autoriza.
+`automatic` preserves the optional flow that asks for permission before the first write. `non-git` allows direct writing in a trusted folder without requiring Git and retains its explicit confirmation. Architecture keeps a `read-only` sandbox; implementation and fixes receive `workspace-write` only when the mode already authorizes it.
 
-### Worktrees y workspaces sombra compatibles
+### Compatible worktrees and shadow workspaces
 
-Las sesiones aisladas creadas con versiones anteriores conservan su snapshot y se reanudan con la semántica original:
+Isolated sessions created by previous versions preserve their snapshot and resume with their original semantics:
 
 ```text
-raíz exacta de un repositorio Git limpio y con commit
-  -> worktree detached administrado por Baldr
+exact root of a clean committed Git repository
+  -> detached worktree managed by Baldr
 
-Git sucio/sin commit, carpeta sin Git o subcarpeta dentro de otro repo
-  -> workspace sombra durable administrado por Baldr
+dirty/uncommitted Git, non-Git folder, or subfolder inside another repository
+  -> durable shadow workspace managed by Baldr
 ```
 
-Baldr no amplía una subcarpeta seleccionada hasta la raíz Git de un directorio padre. En estos runs aislados, una raíz Git debe tener un commit y estar limpia para obtener el aislamiento por worktree; si está sucia o todavía no tiene commit, el snapshot legado `auto` captura ese estado como baseline de un shadow en vez de bloquear, hacer stash o escribir directamente.
+Baldr does not expand a selected subfolder to the Git root of a parent directory. In these isolated runs, a Git root must have a commit and be clean to receive worktree isolation; if it is dirty or has no commit yet, the legacy `auto` snapshot captures that state as a shadow baseline instead of blocking, stashing, or writing directly.
 
-### Raíz Git exacta
+### Exact Git root
 
-Para un repositorio Git limpio y `write_isolation = "auto"`, Baldr crea un worktree detached bajo su directorio de estado.
+For a clean Git repository with `write_isolation = "auto"`, Baldr creates a detached worktree under its state directory.
 
 ```text
-original repo
+original repository
   <- patch publication
 Baldr worktree
-  <- checkpoint commit después de cada write step
+  <- checkpoint commit after each write step
 ```
 
-Cada checkpoint registra:
+Each checkpoint records:
 
 - base commit;
 - checkpoint commit;
-- hash del diff;
-- patch binario;
-- step que produjo el cambio;
-- estado `prepared`, `checkpointed` o `published`.
+- diff hash;
+- binary patch;
+- step that produced the change;
+- `prepared`, `checkpointed`, or `published` state.
 
-La publicación es idempotente: si Baldr se cae después de aplicar el patch pero antes de persistir `published`, el siguiente intento detecta que el mismo patch ya está presente y reconcilia sin aplicarlo dos veces.
+Publication is idempotent: if Baldr crashes after applying the patch but before persisting `published`, the next attempt detects that the same patch is already present and reconciles without applying it twice.
 
-### Carpeta sin Git o alcance parcial
+### Non-Git folder or partial scope
 
-Para una carpeta sin Git —o una subcarpeta elegida dentro de un repositorio padre— un snapshot aislado legado crea:
+For a non-Git folder—or a selected subfolder inside a parent repository—a legacy isolated snapshot creates:
 
 ```text
-<estado-local-de-baldr>/shadow-workspaces/<run-id>/
-  tree/                 copia sobre la que trabajan los agentes
-    .git/               Git privado auxiliar
+<baldr-local-state>/shadow-workspaces/<run-id>/
+  tree/                 copy used by agents
+    .git/               auxiliary private Git repository
   control/
-    state.json          estado durable y manifests seleccionados
-    journal/            eventos de preparación, checkpoint y publicación
-    manifests/          manifests inmutables por contenido
-    blobs/              contenido inmutable identificado por SHA-256
+    state.json          durable state and selected manifests
+    journal/            preparation, checkpoint, and publication events
+    manifests/          immutable content-addressed manifests
+    blobs/              immutable content identified by SHA-256
 ```
 
-Esta ubicación pertenece al estado durable de Baldr; no usa `/tmp` y puede abrirse nuevamente después de reiniciar VS Code, el router o la máquina. El Git privado de `tree/` facilita inspección y checkpoints locales, pero no es la fuente de verdad: la autoridad portable son los manifests y blobs identificados por hash.
+This location belongs to Baldr's durable state; it does not use `/tmp` and can be opened again after restarting VS Code, the router, or the machine. Private Git in `tree/` supports inspection and local checkpoints, but it is not the source of truth: the portable authority is the hash-identified manifests and blobs.
 
-Baldr toma un manifest inicial, materializa la copia, vuelve a escanear el origen y comprueba que ambos hashes coincidan antes de ejecutar un provider. Arquitectura, implementación, revisión y correcciones reciben `tree/` como workspace. Un adapter `advisory`, un Codex SDK que no demuestre cwd o un sandbox irrestricto se bloquean antes de invocarse; el usuario puede elegir explícitamente un modo directo si acepta esa garantía reducida. La carpeta original queda intacta hasta que la revisión aprueba el resultado o la persona decide aplicar el checkpoint verificado.
+Baldr takes an initial manifest, materializes the copy, rescans the source, and verifies that both hashes match before running a provider. Architecture, implementation, review, and corrections receive `tree/` as their workspace. An `advisory` adapter, a Codex SDK that cannot prove cwd, or an unrestricted sandbox is blocked before invocation; the user can explicitly choose a direct mode if they accept that reduced guarantee. The original folder remains intact until review approves the result or the user decides to apply the verified checkpoint.
 
-Después de cada fase con escritura se crea otro manifest. El delta incluye archivos nuevos, modificados y eliminados, cambios de tipo y modos. Antes de tocar el original, Baldr vuelve a calcular sus hashes. Cada ruta que Baldr modificó debe seguir igual al manifest inicial o coincidir ya con el resultado esperado. Las rutas ajenas al delta se conservan con su estado actual, por lo que el trabajo independiente puede continuar mientras Baldr opera en la copia protegida. Si una misma ruta cambió de ambos lados, la publicación se detiene con un conflicto sin empezar a aplicar el plan.
+Another manifest is created after every write phase. The delta includes added, modified, and removed files, type changes, and mode changes. Before touching the original, Baldr recalculates its hashes. Every path Baldr changed must still match the initial manifest or already match the expected result. Paths outside the delta keep their current state, so independent work can continue while Baldr operates on the protected copy. If the same path changed on both sides, publication stops with a conflict before applying the plan.
 
-La publicación guarda primero su plan y su cursor en SQLite y en el journal del workspace sombra. Cada operación de borrar, crear, reemplazar o cambiar modo se registra antes y después del efecto junto con un guard del contenido/identidad del target y sus padres. El guard se vuelve a validar después de registrar el intent y justo antes del efecto, cerrando cambios posteriores al preflight. Por eso un reintento puede omitir rutas ya aplicadas y continuar las restantes sin duplicar cambios. Si un crash ocurre durante una operación, el estado se clasifica como publicación parcial: se conserva la copia y no se ofrece un descarte que pueda dejar efectos sin reconciliar.
+Publication first stores its plan and cursor in SQLite and the shadow workspace journal. Every delete, create, replace, or mode-change operation is recorded before and after the effect together with a guard over the content/identity of the target and its parents. The guard is revalidated after recording the intent and immediately before the effect, closing the window for changes after preflight. A retry can therefore skip already-applied paths and continue the remaining ones without duplication. If a crash occurs during an operation, the state is classified as partial publication: the copy is preserved and no discard is offered that could leave effects unreconciled.
 
-Las acciones visibles se calculan desde el estado durable; no todas están disponibles en todos los estados:
+Visible actions are calculated from durable state; not all actions are available in every state:
 
 ```text
-Ver la copia protegida              inspect_shadow
-Continuar desde la copia protegida  continue_from_shadow
-Aplicar los cambios protegidos      apply_shadow_changes
-Descartar la copia protegida        discard_shadow
+View protected copy      inspect_shadow
+Continue from copy       continue_from_shadow
+Apply protected changes  apply_shadow_changes
+Discard protected copy   discard_shadow
 ```
 
-`Descartar` sólo se ofrece si la publicación todavía no pudo modificar el original (o existe un rollback verificado). Las mismas opciones aparecen ante un fallo de fase o un review con cambios pendientes. `Aplicar` publica el último checkpoint verificado por decisión explícita; sólo recupera `approved` cuando review ya había aprobado. Ante un conflicto o una publicación parcial, la opción segura es inspeccionar y, cuando el preflight lo permita, reintentar la aplicación idempotente. También se puede marcar el run como fallido conservando su journal y evidencia.
+`Discard` is offered only if publication could not yet have modified the original, or if a verified rollback exists. The same options appear after a phase failure or a review with pending changes. `Apply` publishes the latest verified checkpoint by explicit decision; it restores `approved` only when review had already approved it. On conflict or partial publication, the safe option is to inspect and, when preflight permits, retry the idempotent application. The run can also be marked failed while retaining its journal and evidence.
 
-### Exclusiones, límites y portabilidad
+### Exclusions, limits, and portability
 
-El snapshot nunca sigue enlaces simbólicos. Sólo admite enlaces relativos cuyo destino permanezca dentro del workspace; rechaza enlaces absolutos, destinos externos, archivos especiales y reparse points de Windows que no sean enlaces soportados. Los manifests registran el destino de cada enlace y los modos de archivos y directorios. En Linux y macOS se restauran los modos POSIX; en Windows la ejecutabilidad/read-only es de mejor esfuerzo y un sistema que no permita crear el enlace devuelve un error explícito. También se rechazan nombres no portables, colisiones por mayúsculas/minúsculas y rutas reservadas de Windows antes de ejecutar agentes.
+The snapshot never follows symbolic links. It accepts only relative links whose target stays within the workspace; absolute links, external targets, special files, and unsupported Windows reparse points are rejected. Manifests record each link target and file/directory modes. POSIX modes are restored on Linux and macOS; on Windows, executable/read-only state is best effort, and a system that cannot create the link returns an explicit error. Non-portable names, case-insensitive collisions, and reserved Windows paths are also rejected before agents run.
 
-Las reglas duras excluyen metadatos `.git`, `.hg` y `.svn` en cualquier profundidad. Así, un repositorio anidado se copia como contenido normal, pero nunca se expone su metadata de control. Por defecto también se excluyen directorios generados como `node_modules`, `.venv`, caches, `dist`, `build` y `target`, además de patrones de binarios intermedios. Existe un piso no reemplazable para `.ssh`, `.aws`, `.gnupg`, `.npmrc`, `.netrc`, claves privadas, `.env` y credenciales; la configuración sólo agrega patrones, salvo una inclusión explícita. Si un agente intenta crear una ruta sensible equivalente, el checkpoint falla de forma visible. Las plantillas como `.env.example` están permitidas. Contenido excluido nunca se infiere como borrado y bloquea la eliminación de un padre si pudiera perderse.
+Hard rules exclude `.git`, `.hg`, and `.svn` metadata at any depth. A nested repository is therefore copied as normal content, but its control metadata is never exposed. Generated directories such as `node_modules`, `.venv`, caches, `dist`, `build`, and `target`, as well as intermediate binary patterns, are also excluded by default. A non-replaceable floor covers `.ssh`, `.aws`, `.gnupg`, `.npmrc`, `.netrc`, private keys, `.env`, and credentials; configuration can only add patterns unless there is an explicit inclusion. If an agent attempts to create an equivalent sensitive path, the checkpoint fails visibly. Templates such as `.env.example` are allowed. Excluded content is never inferred as deleted and blocks removing a parent if that content could be lost.
 
-La política aislada queda congelada en esos runs y conserva estos campos de `[workspace]`:
+The isolated policy is frozen in those runs and retains these `[workspace]` fields:
 
 ```toml
 write_isolation = "auto"
@@ -344,11 +341,11 @@ shadow_exclude_patterns = []
 shadow_include_patterns = []
 ```
 
-`shadow_max_files` limita todas las entradas administradas, incluidos directorios. Los patrones generados internos también excluyen extensiones intermedias como `*.pyc`, `*.class` y `*.obj`. `.git`, `.hg` y `.svn` no pueden reincorporarse con `shadow_include_patterns`. Si se supera un límite, Baldr falla antes de iniciar el provider y muestra cuál fue; nunca cae silenciosamente a escritura directa.
+`shadow_max_files` limits all managed entries, including directories. Internal generated patterns also exclude intermediate extensions such as `*.pyc`, `*.class`, and `*.obj`. `.git`, `.hg`, and `.svn` cannot be reintroduced with `shadow_include_patterns`. If a limit is exceeded, Baldr fails before starting the provider and reports which limit was hit; it never silently falls back to direct writing.
 
-### Limpieza, retención y compatibilidad
+### Cleanup, retention, and compatibility
 
-Tras una publicación verificada, el default elimina el workspace sombra inmediatamente. Si la limpieza falla, el checkpoint queda `cleanup_pending` para que maintenance la reintente sin cambiar el resultado aprobado. La retención es configurable:
+After verified publication, the default behavior removes the shadow workspace immediately. If cleanup fails, the checkpoint remains `cleanup_pending` so maintenance can retry without changing the approved result. Retention is configurable:
 
 ```toml
 cleanup_successful_shadow_workspaces = true
@@ -358,33 +355,33 @@ shadow_failed_retention_days = 30
 shadow_conflict_retention_days = 90
 ```
 
-Maintenance valida ownership y estado terminal antes de eliminar una copia; nunca borra un shadow todavía recuperable por inferencia de edad solamente. `cleanup_successful_shadow_workspaces=false` conserva también los aprobados, independientemente de la retención de éxito.
+Maintenance validates ownership and terminal state before removing a copy; it never deletes a still-recoverable shadow based on age alone. `cleanup_successful_shadow_workspaces=false` also keeps approved shadows regardless of successful retention settings.
 
-Los work items nuevos usan `automatic`, que se resuelve a escritura `in-place` sólo después de la autorización por tarea. Los valores guardados existentes conservan su semántica: `worktree` sigue siendo el modo Git aislado legado; un snapshot histórico con `write_isolation = "auto"` puede resolver a worktree o shadow; `current` trabaja directamente sobre un repositorio Git y `non-git` es la opción explícita **Sin protección**, con confirmación y sin rollback automático.
+New work items use `automatic`, which resolves to `in-place` writing only after per-task authorization. Existing stored values preserve their semantics: `worktree` remains legacy isolated Git mode; a historical snapshot with `write_isolation = "auto"` may resolve to worktree or shadow; `current` works directly on a Git repository, and `non-git` is the explicit **No protection** option with confirmation and no automatic rollback.
 
-## Idempotencia
+## Idempotency
 
-Un caller puede enviar `idempotency_key` a `run`. La key queda ligada a un request fingerprint compuesto por workspace/repository identity, workflow version, hashes de task/contexto y snapshot de configuración. La misma key con el mismo fingerprint recupera el workflow; una solicitud distinta devuelve `idempotency_conflict`.
+A caller may send `idempotency_key` to `run`. The key is bound to a request fingerprint comprising workspace/repository identity, workflow version, task/context hashes, and configuration snapshot. The same key with the same fingerprint retrieves the workflow; a different request returns `idempotency_conflict`.
 
-Cada provider attempt también tiene una key derivada de:
+Each provider attempt also has a key derived from:
 
 ```text
 run + step + profile + attempt number
 ```
 
-Esto impide duplicar un intento ya confirmado. Un write attempt `unknown` nunca se repite automáticamente.
+This prevents duplication of an already-confirmed attempt. An `unknown` write attempt is never repeated automatically.
 
-## Cancelación durable y reconciliación
+## Durable cancellation and reconciliation
 
-La cancelación se materializa antes de terminar procesos:
+Cancellation is materialized before processes are terminated:
 
 ```text
 running -> cancelling -> cancelled
 ```
 
-Baldr persiste timestamp/reason, termina el process tree del run y marca attempts, participants y steps como `cancelled`. Una solicitud repetida es idempotente y recovery puede completarla si el cliente desaparece.
+Baldr persists timestamp/reason, terminates the run's process tree, and marks attempts, participants, and steps as `cancelled`. A repeated request is idempotent, and recovery can complete it if the client disappears.
 
-Un write attempt con efectos inciertos queda `unknown` y el workflow pasa a `awaiting_reconciliation`. El operador puede continuar usando la misma intención `run` con una acción que el core haya habilitado para ese estado:
+A write attempt with uncertain effects remains `unknown` and the workflow moves to `awaiting_reconciliation`. The operator can continue using the same `run` intent with an action enabled by the core for that state:
 
 ```text
 authorization: authorize_changes | decline_changes
@@ -393,17 +390,17 @@ worktree: resume_from_checkpoint | accept_existing_changes | discard_worktree
 mark_failed
 ```
 
-Baldr inspecciona ownership, manifests, cursor y conflictos del shadow, o identidad, HEAD, patch y worktree, antes de ofrecer acciones. Ninguna escritura incierta se reintenta automáticamente y `discard_shadow` se omite si una publicación parcial pudo modificar el original.
+Baldr inspects shadow ownership, manifests, cursor, and conflicts—or worktree identity, HEAD, and patch—before offering actions. No uncertain write is retried automatically, and `discard_shadow` is omitted when partial publication may have modified the original.
 
-## Maintenance, sessions y reducers
+## Maintenance, sessions, and reducers
 
-El control plane ejecuta integrity/foreign-key checks, backups pre-migration, GC de runs/artifacts, expiración de sesiones y WAL checkpoints. Las sesiones se invalidan por TTL, turn count, identidad de repositorio o versión de provider.
+The control plane runs integrity/foreign-key checks, pre-migration backups, run/artifact GC, session expiration, and WAL checkpoints. Sessions are invalidated by TTL, turn count, repository identity, or provider version.
 
-Cuando una fase tiene múltiples participants, Baldr usa reducers determinísticos sobre structured reports. Arquitectura soporta `primary-with-advisors`, `unanimous` y `conflict-blocks`; review soporta `any-blocker`, `all-approved`, `quorum` y `conflict-blocks`. No se invoca otro modelo para consolidar.
+When a phase has multiple participants, Baldr applies deterministic reducers to structured reports. Architecture supports `primary-with-advisors`, `unanimous`, and `conflict-blocks`; review supports `any-blocker`, `all-approved`, `quorum`, and `conflict-blocks`. No additional model is invoked for consolidation.
 
-## Evidence desde SQLite
+## Evidence from SQLite
 
-Cuando un workflow termina, Baldr genera evidence a partir del journal y el estado durable, no desde memoria efímera.
+When a workflow ends, Baldr generates evidence from the journal and durable state, not ephemeral memory.
 
 ```text
 ~/.local/state/baldr-router/evidence/workflow-<run-id>/
@@ -415,11 +412,11 @@ Cuando un workflow termina, Baldr genera evidence a partir del journal y el esta
   manifest.json
 ```
 
-El bundle no contiene API keys, raw prompts ni código del workspace. Los artifacts privados quedan referenciados y redactados según su nivel.
+The bundle does not contain API keys, raw prompts, or workspace code. Private artifacts remain referenced and redacted according to their level.
 
-## Superficie pública congelada
+## Frozen public surface
 
-La durabilidad no agrega intenciones de producto:
+Durability adds no product intents:
 
 ```text
 setup
@@ -427,27 +424,27 @@ status
 run
 ```
 
-- `setup` prepara configuración, trust, probe y verificación;
-- `status` muestra schema, runs no terminales, recovery y perfiles resueltos;
-- `run` crea o reanuda el workflow durable.
+- `setup` prepares configuration, trust, probing, and verification;
+- `status` shows schema, non-terminal runs, recovery, and resolved profiles;
+- `run` creates or resumes the durable workflow.
 
-Las tools MCP existentes aceptan opcionalmente `idempotency_key` y `resume_run_id`, sin cambiar el workflow, los roles ni los providers congelados.
+Existing MCP tools optionally accept `idempotency_key` and `resume_run_id` without changing the frozen workflow, roles, or providers.
 
-## Pruebas de crash y upgrade
+## Crash and upgrade tests
 
-La suite cubre:
+The suite covers:
 
-- crash antes y después de cada boundary durable del workflow;
-- read-only retry seguro;
-- write side effects convertidos a `unknown`;
-- snapshot de configuración preservado después de un upgrade;
-- sesiones persistentes separadas por role/model/profile;
-- migraciones SQLite y checksum;
-- journal y estado materializado consistentes;
-- publicación Git idempotente;
-- copia, checkpoint y publicación sombra idempotente;
-- conflicto por hash y crash durante una publicación parcial;
-- límites, exclusiones, modos, symlinks y repositorios anidados;
-- evidence reconstruido desde SQLite.
+- crashes before and after every durable workflow boundary;
+- safe read-only retry;
+- write side effects converted to `unknown`;
+- configuration snapshot preserved after an upgrade;
+- persistent sessions separated by role/model/profile;
+- SQLite migrations and checksums;
+- consistent journal and materialized state;
+- idempotent Git publication;
+- idempotent shadow copying, checkpointing, and publication;
+- hash conflict and crash during partial publication;
+- limits, exclusions, modes, symlinks, and nested repositories;
+- evidence rebuilt from SQLite.
 
-Los tests sintéticos no reemplazan la matriz E2E real de VS Code, WSL y Kiro, pero permiten reproducir fallos de proceso de manera determinística.
+Synthetic tests do not replace the real E2E matrix for VS Code, WSL, and Kiro, but they make process failures deterministically reproducible.

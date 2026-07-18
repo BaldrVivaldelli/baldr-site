@@ -1,25 +1,25 @@
 ---
 title: Agent Manager
-description: Catálogo y resolución de identidades inmutables de agentes.
+description: Catalog and resolution of immutable agent identities.
 ---
 
-Agent Manager almacena y resuelve **releases**, no repositorios. Su unidad de
-trabajo es una identidad exacta junto con el digest del manifiesto.
+Agent Manager stores and resolves **releases**, not repositories. Its unit of
+work is an exact identity paired with the manifest digest.
 
-## Qué conserva
+## What it stores
 
-- `AgentRef` versionado;
-- digest canónico del manifiesto;
-- capacidades y modo de efectos;
-- transporte y ubicación estable;
-- estado de activación y salud;
-- eventos administrativos para auditoría y rollback.
+- versioned `AgentRef`;
+- canonical manifest digest;
+- capabilities and effect mode;
+- transport and stable location;
+- activation and health state;
+- administrative events for audit and rollback.
 
-## Qué resuelve
+## What it resolves
 
-Router consulta participantes compatibles con un rol. Agent Manager puede
-devolver una versión activa o validar una referencia fijada explícitamente. El
-resultado se congela en el snapshot del workflow.
+Router queries participants compatible with a role. Agent Manager can return
+an active version or validate an explicitly pinned reference. The result is
+frozen in the workflow snapshot.
 
 ```text
 role.implementer + workspace.write
@@ -30,7 +30,7 @@ local://product/repository-writer@1.2.0
 + local-process target
 ```
 
-Publicar otra vez el mismo contenido es idempotente. Publicar contenido distinto
-bajo la misma versión se rechaza.
+Publishing the same content again is idempotent. Publishing different content
+under the same version is rejected.
 
-Siguiente: [identidad inmutable](/baldr-site/concepts/identity/).
+Next: [immutable identity](/baldr-site/concepts/identity/).

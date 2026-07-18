@@ -1,12 +1,12 @@
 ---
 title: "VS Code integration"
-description: "Referencia técnica de Baldr sincronizada desde v0.20.0."
+description: "Baldr technical reference synchronized from v0.20.0."
 editUrl: false
 ---
 
-:::note[Fuente canónica · v0.20.0]
-Esta página se genera desde [`vscode.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/vscode.md). No la edites en este repositorio.
-Digest de la fuente: `aac481114f5018ca44f091a6be0aa87651d5166f02edc862ad31b8f0677707f2`.
+:::note[Canonical source · v0.20.0]
+This page is generated from [`vscode.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/vscode.md). Do not edit it in this repository.
+Source digest: `aac481114f5018ca44f091a6be0aa87651d5166f02edc862ad31b8f0677707f2`.
 :::
 ## Recommended: native extension
 

@@ -1,17 +1,17 @@
 ---
-title: Superficies disponibles
-description: Diferentes formas de iniciar y observar el mismo control plane.
+title: Available surfaces
+description: Different ways to start and observe the same control plane.
 ---
 
-Las integraciones no implementan su propio orquestador. Todas convierten la
-experiencia nativa en las mismas intenciones del Router.
+Integrations do not implement their own orchestrator. They all map their native
+experience to the same Router intents.
 
-| Superficie | Ideal para | Frontera propia |
+| Surface | Best for | Own boundary |
 | --- | --- | --- |
-| [VS Code](./vscode/) | trabajo diario en un repositorio | extensión, workspace trust y UI |
-| [Kiro](./kiro/) | chat, hooks y Specs | Power y adapter |
-| [CLI](./cli-mcp/) | automatización y diagnóstico | comandos y salida estructurada |
-| [MCP](./cli-mcp/) | otros clientes compatibles | tools `setup`, `status`, `run` |
+| [VS Code](./vscode/) | daily repository work | extension, workspace trust, and UI |
+| [Kiro](./kiro/) | chat, hooks, and Specs | Power and adapter |
+| [CLI](./cli-mcp/) | automation and diagnostics | commands and structured output |
+| [MCP](./cli-mcp/) | other compatible clients | `setup`, `status`, and `run` tools |
 
-Codex y Kiro normales continúan disponibles incluso si no instalaste Agent
-Builder, SDKs o agentes externos.
+Standard Codex and Kiro remain available even if you have not installed Agent
+Builder, SDKs, or external agents.

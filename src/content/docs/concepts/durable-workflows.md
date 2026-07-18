@@ -1,24 +1,24 @@
 ---
-title: Workflows durables
-description: Estado, reintentos y recuperación más allá de la vida de una interfaz.
+title: Durable workflows
+description: State, retries, and recovery beyond the lifetime of an interface.
 ---
 
-Una tarea no es una única llamada al modelo. Es un estado versionado que
-conserva qué se intentó, quién participó y qué resultado puede afirmarse.
+A task is not a single model call. It is versioned state that preserves what
+was attempted, who participated, and which result can be asserted.
 
-## Snapshot inicial
+## Initial snapshot
 
-Al comenzar, Router fija:
+At startup, Router pins:
 
-- versión del workflow;
-- providers, modelos, agentes y perfiles;
-- permisos y modo del workspace;
-- límites de rondas;
-- contexto público permitido.
+- workflow version;
+- providers, models, agents, and profiles;
+- workspace permissions and mode;
+- round limits;
+- allowed public context.
 
-Una recuperación no adopta silenciosamente una configuración posterior.
+Recovery does not silently adopt a later configuration.
 
-## Estado durable
+## Durable state
 
 ```text
 work item
@@ -29,17 +29,17 @@ work item
           └─ participants -> attempts -> evidence
 ```
 
-Intentos, leases, idempotency keys, checkpoints y eventos permiten distinguir
-un reintento seguro de una ejecución cuyo efecto es incierto.
+Attempts, leases, idempotency keys, checkpoints, and events distinguish a safe
+retry from an execution whose effect is uncertain.
 
-## Progreso público
+## Public progress
 
-La interfaz recibe una proyección acotada: etapa, actividad, entregables,
-resultado, archivos cambiados y decisiones necesarias. Prompts, razonamiento,
-raíces privadas y stdout/stderr crudo no cruzan esa frontera.
+The interface receives a bounded projection: stage, activity, deliverables,
+result, changed files, and required decisions. Prompts, reasoning, private
+roots, and raw stdout/stderr do not cross that boundary.
 
-## Continuaciones
+## Continuations
 
-Una conversación puede añadir un pedido al mismo work item. Baldr crea una
-nueva revisión y transporta solamente campos permitidos del resultado anterior
-más el nuevo contexto privado.
+A conversation can add a request to the same work item. Baldr creates a new
+revision and carries forward only allowed fields from the previous result plus
+the new private context.

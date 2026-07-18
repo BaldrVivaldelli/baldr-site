@@ -1,12 +1,12 @@
 ---
 title: "Codex"
-description: "Referencia técnica de Baldr sincronizada desde v0.20.0."
+description: "Baldr technical reference synchronized from v0.20.0."
 editUrl: false
 ---
 
-:::note[Fuente canónica · v0.20.0]
-Esta página se genera desde [`codex.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/codex.md). No la edites en este repositorio.
-Digest de la fuente: `4c8e42f039c17fa83b2c996c51bce52336731b2d619dca0119c2681ec1b38691`.
+:::note[Canonical source · v0.20.0]
+This page is generated from [`codex.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/codex.md). Do not edit it in this repository.
+Source digest: `4c8e42f039c17fa83b2c996c51bce52336731b2d619dca0119c2681ec1b38691`.
 :::
 Codex can participate in two different ways.
 

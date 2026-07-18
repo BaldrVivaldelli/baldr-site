@@ -1,38 +1,38 @@
 ---
-title: Modelo conceptual
-description: El vocabulario estable con el que Baldr coordina agentes y providers.
+title: Conceptual model
+description: The stable vocabulary Baldr uses to coordinate agents and providers.
 ---
 
-Baldr distingue conceptos que en un prototipo suelen mezclarse.
+Baldr distinguishes concepts that prototypes often blur together.
 
-| Concepto | Significado |
+| Concept | Meaning |
 | --- | --- |
-| Rol | Responsabilidad en una fase: architect, implementer o reviewer |
-| AgentRef | Identidad versionada de un participante externo |
-| Digest | Prueba del contenido canónico de un manifiesto o artefacto |
-| Capacidad | Acción que un agente declara poder realizar |
-| Efecto | Frontera operacional efectiva, como lectura o escritura |
-| Driver | Implementación de build para un lenguaje |
-| Release | Definición, artefacto y manifiestos inmutables |
-| Snapshot | Configuración y equipo congelados para un workflow |
+| Role | Responsibility in a phase: architect, implementer, or reviewer |
+| AgentRef | Versioned identity of an external participant |
+| Digest | Proof of the canonical content of a manifest or artifact |
+| Capability | Action an agent declares it can perform |
+| Effect | Effective operational boundary, such as reading or writing |
+| Driver | Build implementation for a language |
+| Release | Immutable definition, artifact, and manifests |
+| Snapshot | Configuration and team frozen for a workflow |
 
-## Relaciones importantes
+## Important relationships
 
 ```text
-rol + capacidades requeridas
+role + required capabilities
             |
             v
 AgentRef + digest + effect_mode
             |
             v
-participante durable del workflow
+durable workflow participant
 ```
 
-Un nombre humano ayuda a elegir. Una identidad exacta permite repetir,
-auditar y revertir.
+A human-friendly name helps with selection. An exact identity makes work
+repeatable, auditable, and reversible.
 
-## Profundizar
+## Learn more
 
-- [Identidad inmutable](./identity/)
-- [Capacidades y efectos](./capabilities-effects/)
-- [Workflows durables](./durable-workflows/)
+- [Immutable identity](./identity/)
+- [Capabilities and effects](./capabilities-effects/)
+- [Durable workflows](./durable-workflows/)

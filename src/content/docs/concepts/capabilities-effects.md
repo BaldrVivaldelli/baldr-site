@@ -1,40 +1,39 @@
 ---
-title: Capacidades y efectos
-description: Cómo Baldr calcula el permiso efectivo de cada invocación.
+title: Capabilities and effects
+description: How Baldr calculates the effective permission of each invocation.
 ---
 
-Seleccionar un agente no le concede automáticamente los permisos de la
-aplicación que lo invocó. El permiso efectivo surge de una intersección:
+Selecting an agent does not automatically grant it the permissions of the
+application that invoked it. Effective permission is an intersection:
 
 ```text
-capacidades del manifiesto
+manifest capabilities
         ∩
-efectos permitidos por la fase
+effects allowed by the phase
         ∩
-política del workspace confiado
+trusted workspace policy
         =
-invocación efectiva
+effective invocation
 ```
 
-## Lectura
+## Reading
 
-Planificación y revisión reciben una copia descartable y reducida. La copia no
-contiene metadata Git, symlinks, entradas especiales ni directorios generados
-conocidos. El agente no recibe la ruta original.
+Planning and review receive a reduced, disposable copy. It contains no Git
+metadata, symlinks, special entries, or known generated directories. The agent
+does not receive the original path.
 
-## Escritura
+## Writing
 
-Implementación puede recibir el workspace exacto cuando se cumplen todas estas
-condiciones:
+Implementation can receive the exact workspace when all these conditions hold:
 
-1. el rol necesita escritura;
-2. el manifiesto declara `workspace.write`;
-3. `effect_mode` es `workspace-write`;
-4. la superficie ya confió el workspace;
-5. Router conserva un único escritor para la fase.
+1. the role requires writing;
+2. the manifest declares `workspace.write`;
+3. `effect_mode` is `workspace-write`;
+4. the surface has already trusted the workspace;
+5. Router preserves a single writer for the phase.
 
-## Fallos con significado diferente
+## Failures with different meanings
 
-Una lectura cancelada no deja cambios y puede reintentarse. Una escritura
-interrumpida puede haber producido efectos parciales: el estado pasa a
-`unknown` y exige reconciliación en lugar de una repetición automática.
+A canceled read leaves no changes and can be retried. An interrupted write may
+have produced partial effects: state becomes `unknown` and requires
+reconciliation instead of automatic repetition.

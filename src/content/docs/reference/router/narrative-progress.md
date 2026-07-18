@@ -1,65 +1,73 @@
 ---
-title: "Progreso narrativo de BALDR"
-description: "Referencia técnica de Baldr sincronizada desde v0.20.0."
+title: "BALDR narrative progress"
+description: "Baldr technical reference synchronized from v0.20.0."
 editUrl: false
 ---
 
-:::note[Fuente canónica · v0.20.0]
-Esta página se genera desde [`narrative-progress.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/narrative-progress.md). No la edites en este repositorio.
-Digest de la fuente: `672f25488e0c74f7b991629a10b0c9d703c4d5623918b405760bd819136084b7`.
+:::note[Canonical source · v0.20.0]
+This page is generated from [`narrative-progress.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/narrative-progress.md). Do not edit it in this repository.
+Source digest: `672f25488e0c74f7b991629a10b0c9d703c4d5623918b405760bd819136084b7`.
 :::
-La consola debe permitir que una persona, sin conocer agentes, modelos ni estados internos, responda rápidamente cuatro preguntas:
+The console must let a person who knows nothing about agents, models, or
+internal states quickly answer four questions:
 
-1. ¿Qué está haciendo BALDR ahora?
-2. ¿Qué ya terminó?
-3. ¿Cuál fue el resultado?
-4. ¿Necesita algo de mí?
+1. What is BALDR doing now?
+2. What has already finished?
+3. What was the result?
+4. Does it need anything from me?
 
-La experiencia no representa un porcentaje ni una estimación ficticia. Se reconstruye exclusivamente desde pasos, reportes y eventos durables.
+The experience does not show a percentage or a fictional estimate. It is
+reconstructed exclusively from durable steps, reports, and events.
 
-## Jerarquía de información
+## Information hierarchy
 
-La vista usa divulgación progresiva:
+The view uses progressive disclosure:
 
 ```text
-Qué sucede ahora
-  -> título y explicación en lenguaje cotidiano
-  -> última actividad durable
+What is happening now
+  -> title and explanation in everyday language
+  -> latest durable activity
 
-Etapas
-  -> Planificación: qué entendió y qué decidió
-  -> Ejecución: qué hizo y cómo lo comprobó
-  -> Revisión: qué verificó y qué encontró
+Stages
+  -> Planning: what it understood and decided
+  -> Execution: what it did and how it checked the work
+  -> Review: what it verified and found
 
-Resultado
-  -> cambios, comprobaciones, pendientes y próximos pasos
+Result
+  -> changes, checks, pending work, and next steps
 
-Detalles técnicos
-  -> perfiles, intentos, comandos, códigos y registros
+Technical details
+  -> profiles, attempts, commands, codes, and records
 ```
 
-La etapa activa se abre automáticamente. Las etapas finalizadas conservan su resumen y sus rondas de corrección; las futuras explican qué ocurrirá. La expansión elegida por la persona, el foco y el scroll deben sobrevivir a las actualizaciones de estado.
+The active stage opens automatically. Completed stages retain their summary
+and correction rounds; future stages explain what will happen. User-selected
+expansion, focus, and scroll must survive state updates.
 
-## Wording visible
+## Visible wording
 
-| Actividad | Título | Explicación |
+| Activity | Title | Explanation |
 | --- | --- | --- |
-| Borrador | Todavía no empezó | La tarea está guardada y lista para comenzar. |
-| Trabajo en curso | Trabajando en la etapa | BALDR todavía no tiene un avance confirmado para mostrar. |
-| Planificación | Organizando el trabajo | BALDR está entendiendo tu pedido y armando un plan. |
-| Ejecución | Haciendo los cambios | BALDR está trabajando según el plan acordado. |
-| Corrección | Ajustando el resultado | BALDR está corrigiendo lo que encontró la revisión. |
-| Revisión | Comprobando el resultado | BALDR verifica que los cambios cumplan tu pedido y funcionen correctamente. |
-| Publicación | Guardando el resultado | El trabajo terminó y se está aplicando de forma segura. |
-| Finalizado | Trabajo listo | Los cambios fueron realizados y revisados. |
-| Intervención | Necesitamos que elijas cómo continuar | El trabajo está preservado; revisá las opciones disponibles. |
-| Cancelado | Trabajo cancelado | BALDR dejó de trabajar en esta tarea. |
+| Draft | Not started yet | The task is saved and ready to begin. |
+| Work in progress | Working on the stage | BALDR does not yet have confirmed progress to show. |
+| Planning | Organizing the work | BALDR is understanding your request and creating a plan. |
+| Execution | Making the changes | BALDR is working according to the agreed plan. |
+| Correction | Adjusting the result | BALDR is correcting what the review found. |
+| Review | Checking the result | BALDR verifies that the changes satisfy your request and work correctly. |
+| Publication | Saving the result | The work is finished and is being applied safely. |
+| Completed | Work ready | The changes were made and reviewed. |
+| Intervention | We need you to choose how to continue | The work is preserved; review the available options. |
+| Canceled | Work canceled | BALDR stopped working on this task. |
 
-Estados operativos como `dispatching`, `running`, `succeeded`, `unknown` o `awaiting_reconciliation` no son copy de producto. El core los proyecta a estados semánticos y la extensión los presenta en español.
+Operational states such as `dispatching`, `running`, `succeeded`, `unknown`, or
+`awaiting_reconciliation` are not product copy. Core projects them to semantic
+states and the extension presents them in the selected language.
 
-## Contrato público
+## Public contract
 
-`WorkItemService.get()` agrega `progress` sin quitar `phases`, `workflow` ni `timeline` de la superficie compatible. La proyección tiene contrato y versión propios:
+`WorkItemService.get()` adds `progress` without removing `phases`, `workflow`,
+or `timeline` from the compatible surface. The projection has its own contract
+and version:
 
 ```json
 {
@@ -82,60 +90,66 @@ Estados operativos como `dispatching`, `running`, `succeeded`, `unknown` o `awai
 }
 ```
 
-Las tres etapas canónicas son `planning`, `execution` y `review`. Las rondas adicionales viven en `history`; no crean tarjetas duplicadas. El estado de ejecución de una fase y su resultado semántico son diferentes: una revisión puede ejecutarse correctamente y, aun así, pedir cambios.
+The three canonical stages are `planning`, `execution`, and `review`.
+Additional rounds live in `history`; they do not create duplicate cards. Phase
+execution state and semantic result are different: a review can execute
+successfully and still request changes.
 
-La proyección se construye por allowlist y aplica límites de texto/listas. Nunca incluye prompts, razonamiento, stdout/stderr, sesiones, leases, tokens de reanudación, rutas privadas del estado ni eventos crudos. Los archivos visibles deben ser rutas relativas contenidas en el workspace.
+The projection is built by allowlist and applies text and list limits. It never
+includes prompts, reasoning, stdout/stderr, sessions, leases, resume tokens,
+private state paths, or raw events. Visible files must be workspace-contained
+relative paths.
 
-Los reportes actuales pueden aportar secciones narrativas explícitas, todas
-acotadas y redactadas antes de cruzar el límite público:
+Current reports can provide explicit narrative sections, all bounded and
+redacted before they cross the public boundary:
 
 ```text
-interpretation          qué entendió BALDR
-scope / approach        alcance y enfoque elegido
-plan_steps              pasos acordados
-work_completed          trabajo terminado
-work_next               trabajo que todavía falta
-findings                hallazgos de revisión
-corrections             correcciones realizadas
-verification_evidence   comprobaciones observables y sus resultados informados
+interpretation          what BALDR understood
+scope / approach        selected scope and approach
+plan_steps              agreed steps
+work_completed          completed work
+work_next               work still pending
+findings                review findings
+corrections             corrections made
+verification_evidence   observable checks and their reported results
 ```
 
-Son aditivas: una tarea histórica sin estas secciones conserva su `summary` y
-las listas anteriores. Ninguna sección representa razonamiento interno ni una
-transcripción del análisis.
+They are additive: a historical task without these sections retains its
+`summary` and previous lists. No section represents internal reasoning or an
+analysis transcript.
 
-## Entregas durables por etapa
+## Durable stage deliverables
 
-Cada Planificación, Ejecución y Revisión terminal materializa una entrega
-estructurada, redactada y ligada a la tarea. No se obtiene parseando logs ni
-expone prompts, razonamiento, respuestas crudas, participantes, rutas de estado
-o identificadores de artefactos. La entrega sobrevive reinicios y la limpieza
-del run que la produjo.
+Each terminal Planning, Execution, and Review materializes a structured,
+redacted deliverable linked to the task. It is not obtained by parsing logs and
+does not expose prompts, reasoning, raw responses, participants, state paths,
+or artifact identifiers. The deliverable survives restarts and cleanup of the
+run that produced it.
 
-La vista de estado sólo transporta descriptores recientes y un
-`deliverable_index` con `total`, `returned`, `truncated`, cursor opaco y acción
-de lectura. Si existe más historia, la consola muestra **Ver entregas
-anteriores** y pagina el índice únicamente bajo demanda. Así todos los intentos
-y rondas siguen siendo inspeccionables sin convertir cada polling en una carga
-de documentos completos.
+The status view carries only recent descriptors and a `deliverable_index` with
+`total`, `returned`, `truncated`, an opaque cursor, and a read action. When more
+history exists, the console shows **View previous deliverables** and paginates
+the index only on demand. All attempts and rounds remain inspectable without
+turning every poll into a full-document load.
 
-Los contratos públicos tienen responsabilidades separadas:
+Public contracts have separate responsibilities:
 
-- `baldr-work-item-progress` describe el estado narrativo y los selectores;
-- `baldr-phase-deliverable-index-page` pagina descriptores históricos;
-- `baldr-phase-deliverable-page` pagina el contenido seguro de una entrega;
-- `baldr-phase-deliverable` representa el documento durable interno y no es la
-  respuesta del façade.
+- `baldr-work-item-progress` describes narrative state and selectors;
+- `baldr-phase-deliverable-index-page` paginates historical descriptors;
+- `baldr-phase-deliverable-page` paginates a deliverable's safe content;
+- `baldr-phase-deliverable` represents the internal durable document and is not
+  the facade response.
 
-Una entrega histórica inválida, ausente o demasiado extensa se declara como
-`summary_only` o `unavailable`; la interfaz nunca inventa detalles. Si el
-resumen no fue conservado, el wording lo dice expresamente. Cursores y
-respuestas están ligados a workspace, tarea, digest y solicitud para impedir
-que una respuesta tardía aparezca sobre otra tarea.
+An invalid, missing, or oversized historical deliverable is declared
+`summary_only` or `unavailable`; the interface never invents details. If the
+summary was not preserved, the wording says so explicitly. Cursors and
+responses are bound to workspace, task, digest, and request so a late response
+cannot appear over another task.
 
-## Hitos en vivo
+## Live milestones
 
-Todos los providers producen una observación genérica al iniciar una fase. Cuando el runner ofrece eventos tipados durante la ejecución, BALDR los reduce a categorías públicas:
+All providers produce a generic observation when a phase starts. When Runner
+provides typed events during execution, BALDR reduces them to public categories:
 
 ```text
 working
@@ -145,42 +159,57 @@ changing
 verifying
 ```
 
-`working` significa únicamente que el rol o un comando está activo. Un evento
-de archivo puede elevarlo a `changing`; sólo un evento de prueba o comprobación
-tipado puede elevarlo a `verifying`. Iniciar un implementador, iniciar un
-revisor, ejecutar un comando genérico, recibir la respuesta final del SDK o
-observar `turn.completed` no demuestra por sí solo un cambio ni una
-verificación.
+`working` means only that the role or a command is active. A file event can
+promote it to `changing`; only a typed test or check event can promote it to
+`verifying`. Starting an implementer, starting a reviewer, running a generic
+command, receiving the final SDK response, or observing `turn.completed` does
+not by itself prove a change or verification.
 
-Sólo se persisten categoría, estado, etapa, timestamp y nivel de evidencia. No se conserva texto de razonamiento, comandos, contenido de archivos ni argumentos de herramientas. Las observaciones se deduplican y limitan para evitar que el journal crezca sin control, y no se convierten en hitos completados.
+Only category, state, stage, timestamp, and evidence level are persisted.
+Reasoning text, commands, file content, and tool arguments are not retained.
+Observations are deduplicated and bounded to prevent uncontrolled journal
+growth, and they do not become completed milestones.
 
-## Evidencia honesta
+## Honest evidence
 
-La UI diferencia implícitamente tres fuentes:
+The UI implicitly distinguishes three sources:
 
-- `reported`: el agente lo informó en su reporte estructurado;
-- `observed`: BALDR observó una transición o actividad del runner;
-- `verified`: BALDR obtuvo evidencia determinista, por ejemplo una publicación o checkpoint validado.
+- `reported`: the agent stated it in its structured report;
+- `observed`: BALDR observed a Runner transition or activity;
+- `verified`: BALDR obtained deterministic evidence, such as a validated
+  publication or checkpoint.
 
-Una entrada textual en `tests_run` significa “el agente informó esta comprobación”; no debe convertirse en “pasó” si el contrato no conserva un resultado verificable.
+A textual entry in `tests_run` means “the agent reported this check”; it must
+not become “passed” when the contract does not preserve a verifiable result.
 
-## Actualización eficiente
+## Efficient updates
 
-El polling visible usa `facade status --workbench-only`. Esta ruta consulta el estado durable y evita diagnóstico de providers, login, qualification, probes y lifecycle checks. La revisión de progreso permite evitar reconstruir el DOM cuando nada cambió. La vista oculta no consulta y una implementación puede aplicar backoff mientras la revisión permanezca estable.
+Visible polling uses `facade status --workbench-only`. This route reads durable
+state and skips provider diagnostics, login, qualification, probes, and
+lifecycle checks. The progress revision avoids rebuilding the DOM when nothing
+changed. A hidden view does not poll, and an implementation can apply backoff
+while the revision remains stable.
 
-El status completo sigue siendo el default para CLI y clientes existentes.
+Full status remains the default for CLI and existing clients.
 
-## Accesibilidad
+## Accessibility
 
-- La actividad actual usa `aria-live="polite"`.
-- Una decisión urgente usa `role="alert"`; los cambios normales no.
-- Los acordeones exponen `aria-expanded` y funcionan con teclado.
-- El visor de entregas es modal: inmoviliza el fondo, encierra el foco, cierra
-  con `Escape` y devuelve el foco al control que lo abrió.
-- Estado e importancia nunca dependen sólo del color.
-- Debe funcionar sin scroll horizontal desde 240 px, con zoom del 200 % y temas de alto contraste.
-- `prefers-reduced-motion` desactiva pulsos y transiciones decorativas.
+- Current activity uses `aria-live="polite"`.
+- An urgent decision uses `role="alert"`; normal changes do not.
+- Accordions expose `aria-expanded` and work with the keyboard.
+- The deliverable viewer is modal: it locks the background, traps focus, closes
+  with `Escape`, and returns focus to the control that opened it.
+- State and importance never depend on color alone.
+- It must work without horizontal scrolling from 240 px, at 200% zoom, and in
+  high-contrast themes.
+- `prefers-reduced-motion` disables pulses and decorative transitions.
 
-## Escenarios obligatorios
+## Required scenarios
 
-La matriz de pruebas cubre: borrador, ejecución larga, finalización correcta, revisión con hallazgos, corrección y segunda revisión, intervención humana, conflicto de publicación, error reintentable/no reintentable, cancelación, archivado, recuperación después de reinicio y datos legacy incompletos. También inyecta HTML, secretos, rutas absolutas y reportes sobredimensionados para verificar escape, redacción y límites; fuerza más de 256 entregas, páginas fuera de orden y cambios de tarea para comprobar historia completa y aislamiento.
+The test matrix covers draft, long execution, successful completion, review
+with findings, correction and second review, human intervention, publication
+conflict, retryable/non-retryable error, cancellation, archival, recovery after
+restart, and incomplete legacy data. It also injects HTML, secrets, absolute
+paths, and oversized reports to verify escaping, redaction, and limits; it
+forces more than 256 deliverables, out-of-order pages, and task changes to
+verify complete history and isolation.

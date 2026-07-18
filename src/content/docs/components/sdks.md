@@ -1,11 +1,11 @@
 ---
 title: SDKs
-description: APIs de autoría para agentes Python y TypeScript.
+description: Authoring APIs for Python and TypeScript agents.
 ---
 
-Un SDK es la única biblioteca de Baldr que importa el código del agente. Expone
-identidad, contexto, eventos y el contrato de respuesta; no incluye la
-toolchain de publicación.
+An SDK is the only Baldr library imported by agent code. It exposes identity,
+context, events, and the response contract; it does not include the publishing
+toolchain.
 
 ## Python
 
@@ -20,7 +20,7 @@ agent = Agent(
 
 @agent.invoke
 def review(request, context):
-    context.emit("verifying", "Revisión completada")
+    context.emit("verifying", "Review completed")
     return {"ok": True, "final_report": {"status": "approved"}}
 ```
 
@@ -36,9 +36,9 @@ const agent = new Agent({
 });
 
 agent.invoke((_request, context) => {
-  context.emit("verifying", "Revisión completada");
+  context.emit("verifying", "Review completed");
   return { ok: true, final_report: { status: "approved" } };
 });
 ```
 
-Ambos lenguajes producen la misma semántica de manifiesto e invocación.
+Both languages produce the same manifest and invocation semantics.

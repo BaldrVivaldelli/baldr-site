@@ -1,12 +1,12 @@
 ---
 title: "Windows / WSL auto-detection"
-description: "Referencia técnica de Baldr sincronizada desde v0.20.0."
+description: "Baldr technical reference synchronized from v0.20.0."
 editUrl: false
 ---
 
-:::note[Fuente canónica · v0.20.0]
-Esta página se genera desde [`windows-wsl.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/windows-wsl.md). No la edites en este repositorio.
-Digest de la fuente: `dab220661dabd64cc068000fcc4ae247f0476446f02cb1ed50c20b200e76456d`.
+:::note[Canonical source · v0.20.0]
+This page is generated from [`windows-wsl.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/windows-wsl.md). Do not edit it in this repository.
+Source digest: `dab220661dabd64cc068000fcc4ae247f0476446f02cb1ed50c20b200e76456d`.
 :::
 `baldr-router` itself is agnostic to Windows, macOS, Linux and WSL. The optional `baldr-router-launcher` exists only to help MCP clients start the router when the client runs on Windows but the router is installed inside WSL.
 

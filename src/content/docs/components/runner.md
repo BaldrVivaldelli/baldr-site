@@ -1,28 +1,28 @@
 ---
 title: Agent Runner
-description: El data plane local que verifica y ejecuta agentes externos.
+description: The local data plane that verifies and executes external agents.
 ---
 
-Runner ejecuta el artefacto **fuera del proceso del Router**. Recibe una
-invocación ya resuelta y aplica la frontera operacional inmediatamente antes de
-iniciar el proceso.
+Runner executes the artifact **outside the Router process**. It receives an
+already resolved invocation and applies the operational boundary immediately
+before starting the process.
 
-## Comprobaciones previas
+## Preflight checks
 
-1. La identidad y el digest coinciden con el manifiesto fijado.
-2. El artefacto es un archivo regular, no un symlink.
-3. Su SHA-256 coincide con el publicado.
-4. Rol, capacidades y efecto solicitado son compatibles.
-5. Tiempo, entrada, salida y entorno están acotados.
+1. Identity and digest match the pinned manifest.
+2. The artifact is a regular file, not a symlink.
+3. Its SHA-256 matches the published value.
+4. Role, capabilities, and requested effect are compatible.
+5. Time, input, output, and environment are bounded.
 
-## Dos modos de workspace
+## Two workspace modes
 
-- `read-only`: copia descartable sin metadata Git, dependencias generadas,
-  symlinks ni permisos de escritura;
-- `workspace-write`: workspace exacto, únicamente cuando fase y manifiesto
-  declaran escritura y Router preserva un solo escritor.
+- `read-only`: disposable copy without Git metadata, generated dependencies,
+  symlinks, or write permissions;
+- `workspace-write`: the exact workspace, only when the phase and manifest
+  declare writing and Router preserves a single writer.
 
-Una cancelación de lectura puede reintentarse. Una escritura interrumpida puede
-haber dejado efectos parciales y se marca `unknown` hasta reconciliarla.
+A canceled read can be retried. An interrupted write may have left partial
+effects and is marked `unknown` until it is reconciled.
 
-Siguiente: [capacidades y efectos](/baldr-site/concepts/capabilities-effects/).
+Next: [capabilities and effects](/baldr-site/concepts/capabilities-effects/).

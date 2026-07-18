@@ -1,33 +1,32 @@
 ---
 title: Router
-description: El control plane que coordina roles, políticas y estado durable.
+description: The control plane that coordinates roles, policies, and durable state.
 ---
 
-Router es la única implementación del dominio de coordinación. Se expone por
-MCP y por una CLI compartida, sin depender de una interfaz concreta.
+Router is the single implementation of the coordination domain. It is exposed
+through MCP and a shared CLI without depending on a specific interface.
 
-## Responsabilidades
+## Responsibilities
 
-- convertir una intención en un workflow versionado;
-- fijar providers, modelos, agentes y perfiles para toda la sesión;
-- coordinar planificación, implementación y revisión;
-- aplicar límites de rondas, reentrada y escritor único;
-- persistir intentos, leases, checkpoints, eventos y decisiones;
-- proyectar progreso público sin filtrar información privada;
-- recuperar o reconciliar ejecuciones interrumpidas.
+- turn an intent into a versioned workflow;
+- pin providers, models, agents, and profiles for the entire session;
+- coordinate planning, implementation, and review;
+- enforce round, re-entry, and single-writer limits;
+- persist attempts, leases, checkpoints, events, and decisions;
+- project public progress without leaking private information;
+- recover or reconcile interrupted executions.
 
-## No le corresponde
+## What it does not own
 
-- almacenar el código fuente de agentes externos;
-- compilar todos los lenguajes;
-- ejecutar código de terceros dentro de su proceso;
-- implementar UX específica de VS Code o Kiro;
-- cambiar silenciosamente participantes durante una sesión.
+- storing external agent source code;
+- compiling every language;
+- executing third-party code inside its process;
+- implementing VS Code- or Kiro-specific UX;
+- silently changing participants during a session.
 
-## Frontera estable
+## Stable boundary
 
-Las fachadas expresan tres intenciones: `setup`, `status` y `run`. Una
-continuación es una nueva revisión durable del mismo work item, no un cuarto
-contrato público.
+Facades express three intents: `setup`, `status`, and `run`. A continuation is
+a new durable revision of the same work item, not a fourth public contract.
 
-Siguiente: [cómo Router mantiene workflows durables](/baldr-site/concepts/durable-workflows/).
+Next: [how Router maintains durable workflows](/baldr-site/concepts/durable-workflows/).

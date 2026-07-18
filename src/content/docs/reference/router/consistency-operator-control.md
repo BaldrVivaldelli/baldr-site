@@ -1,59 +1,59 @@
 ---
 title: "Consistency and Operator Control"
-description: "Referencia técnica de Baldr sincronizada desde v0.20.0."
+description: "Baldr technical reference synchronized from v0.20.0."
 editUrl: false
 ---
 
-:::note[Fuente canónica · v0.20.0]
-Esta página se genera desde [`consistency-operator-control.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/consistency-operator-control.md). No la edites en este repositorio.
-Digest de la fuente: `61322f9f5f59d1d3575b82d70f991b52aa33f3f1c8c4585bf3ab0bffff3fd92f`.
+:::note[Canonical source · v0.20.0]
+This page is generated from [`consistency-operator-control.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/consistency-operator-control.md). Do not edit it in this repository.
+Source digest: `61322f9f5f59d1d3575b82d70f991b52aa33f3f1c8c4585bf3ab0bffff3fd92f`.
 :::
-Baldr Router v0.16 mantiene el contrato público congelado en `setup`, `status` y `run`, pero endurece el control plane durable para que crashes, takeovers, cancelaciones y reintentos no produzcan estados contradictorios.
+Baldr Router v0.16 keeps the public contract frozen at `setup`, `status`, and `run`, while hardening the durable control plane so crashes, takeovers, cancellations, and retries do not produce contradictory states.
 
 ## 1. Fencing tokens
 
-Cada lease tiene owner, expiración y un `lease_epoch` monotónico.
+Each lease has an owner, expiration, and monotonic `lease_epoch`.
 
 ```text
 worker A -> epoch 7
-lease expira
+lease expires
 worker B -> epoch 8
-worker A intenta persistir -> lease_fence_rejected
+worker A attempts to persist -> lease_fence_rejected
 ```
 
-Todas las mutaciones operativas de runs, steps, participants, attempts, sesiones y checkpoints validan el token dentro de la misma transacción SQLite. El fencing no impide que un efecto externo ocurra justo antes de perder el lease; impide que un worker obsoleto lo confirme como estado vigente. Un owner nuevo debe reconciliarlo.
+Every operational mutation of runs, steps, participants, attempts, sessions, and checkpoints validates the token within the same SQLite transaction. Fencing cannot prevent an external effect from occurring immediately before the lease is lost; it prevents a stale worker from confirming that effect as current state. A new owner must reconcile it.
 
-## 2. Idempotencia ligada a la solicitud
+## 2. Request-bound idempotency
 
-Una `idempotency_key` no identifica solamente un nombre: queda ligada a un fingerprint estable de:
+An `idempotency_key` does not identify just a name: it is bound to a stable fingerprint of:
 
-- identidad del workspace y repositorio;
-- workflow y versión;
-- hash de task y contexto;
-- librerías Context7 solicitadas;
-- snapshot de configuración y perfiles.
+- workspace and repository identity;
+- workflow and version;
+- task and context hashes;
+- requested Context7 libraries;
+- configuration and profile snapshot.
 
 ```text
-misma key + mismo fingerprint     -> mismo durable run
-misma key + fingerprint distinto  -> idempotency_conflict
+same key + same fingerprint       -> same durable run
+same key + different fingerprint  -> idempotency_conflict
 ```
 
-El input privado y el run se crean en una única transacción, evitando artifacts huérfanos cuando una key ya existe.
+The private input and run are created in a single transaction, preventing orphaned artifacts when a key already exists.
 
-## 3. Resume estricto
+## 3. Strict resume
 
-Un run durable solo puede reanudarse contra:
+A durable run can be resumed only against:
 
-- la ruta original normalizada;
-- en modo Git, el mismo common directory y fingerprint de roots/remotes;
-- en modo sombra, el mismo ownership, manifest, política congelada y ubicación durable;
-- un workspace todavía confiable.
+- the original normalized path;
+- in Git mode, the same common directory and roots/remotes fingerprint;
+- in shadow mode, the same ownership, manifest, frozen policy, and durable location;
+- a workspace that is still trusted.
 
-Baldr rechaza el resume si el repo fue reemplazado en la misma carpeta, si el estado del shadow fue manipulado o si un cliente intenta mover el run a otra ruta.
+Baldr rejects resume if the repository was replaced in the same folder, if shadow state was tampered with, or if a client attempts to move the run to another path.
 
-## 4. Cancelación durable
+## 4. Durable cancellation
 
-La cancelación sigue esta secuencia:
+Cancellation follows this sequence:
 
 ```text
 running -> cancelling
@@ -63,92 +63,92 @@ attempts/participants/steps -> cancelled
 workflow -> cancelled
 ```
 
-La solicitud es idempotente. Si el cliente desaparece después de pedirla, recovery puede completar la transición desde SQLite.
+The request is idempotent. If the client disappears after making it, recovery can complete the transition from SQLite.
 
-## 5. Reconciliación operable
+## 5. Operable reconciliation
 
-Un write attempt que pierde confirmación durable pasa a `unknown`; el run pasa a `awaiting_reconciliation`. Baldr nunca lo reintenta ciegamente.
+A write attempt that loses durable confirmation becomes `unknown`; the run moves to `awaiting_reconciliation`. Baldr never retries it blindly.
 
-Las acciones se calculan desde el checkpoint, el manifest y el cursor de publicación. Para un workspace sombra pueden ser:
+Actions are calculated from the checkpoint, manifest, and publication cursor. For a shadow workspace they can be:
 
 ```text
 inspect_shadow
-  devuelve ruta, manifests, delta, conflictos y estado de publicación sin modificar archivos
+  returns path, manifests, delta, conflicts, and publication state without changing files
 
 continue_from_shadow
-  restaura el último manifest confirmado y vuelve a ejecutar el paso incierto
+  restores the last confirmed manifest and reruns the uncertain step
 
 apply_shadow_changes
-  retoma la publicación idempotente desde el cursor durable después de un nuevo preflight
+  resumes idempotent publication from the durable cursor after a new preflight
 
 discard_shadow
-  elimina la copia sólo si la publicación no pudo dejar efectos en el original
+  removes the copy only if publication could not have affected the original
 
 mark_failed
-  termina el workflow preservando journal y evidence
+  ends the workflow while preserving the journal and evidence
 ```
 
-Una publicación sombra persiste el plan y marca cada operación como inflight antes de modificar el filesystem; después avanza el cursor. Si el proceso cae entre ambas marcas, recovery trata el original como posiblemente modificado. En ese estado no ofrece `discard_shadow`: sólo permite inspeccionar o reintentar `apply_shadow_changes`, que reconoce operaciones ya terminadas y continúa las restantes. Un conflicto de hashes también conserva el shadow; ninguna escritura incierta se reintenta sin una decisión del operador.
+A shadow publication persists the plan and marks each operation inflight before modifying the filesystem, then advances the cursor. If the process crashes between those markers, recovery treats the original as potentially modified. In that state it does not offer `discard_shadow`: it permits only inspection or retrying `apply_shadow_changes`, which recognizes completed operations and continues the rest. A hash conflict also preserves the shadow; no uncertain write is retried without an operator decision.
 
-Para worktrees existentes continúan `resume_from_checkpoint`, `accept_existing_changes` y `discard_worktree`. Para el modo legado `non-git` sólo se ofrecen las acciones compatibles con una ejecución directa sin checkpoint restaurable. `status` incluye el diagnóstico y la lista exacta de acciones seguras; la UI no inventa capacidades a partir del nombre del modo.
+Existing worktrees retain `resume_from_checkpoint`, `accept_existing_changes`, and `discard_worktree`. Legacy `non-git` mode offers only actions compatible with direct execution without a restorable checkpoint. `status` includes the diagnosis and exact list of safe actions; the UI does not invent capabilities from the mode name.
 
-## 6. Worktrees y workspaces sombra
+## 6. Worktrees and shadow workspaces
 
-Si un worktree desaparece, Baldr verifica el repo original y lo recrea desde `checkpoint_commit` o `base_commit`. Si existe pero HEAD, identidad o artifacts no coinciden, bloquea la ejecución y exige reconciliación.
+If a worktree disappears, Baldr verifies the original repository and recreates it from `checkpoint_commit` or `base_commit`. If it exists but HEAD, identity, or artifacts do not match, execution is blocked and reconciliation is required.
 
-Un workspace sombra se guarda en el directorio de estado local de Baldr, bajo `shadow-workspaces/<run-id>`, nunca en `/tmp`. `tree/` contiene la copia y un Git privado auxiliar; `control/` guarda ownership, estado, manifests SHA-256, blobs y un journal por evento. Los manifests son la autoridad de recuperación: el Git privado no reemplaza la verificación por contenido.
+A shadow workspace is stored in Baldr's local state directory under `shadow-workspaces/<run-id>`, never in `/tmp`. `tree/` contains the copy and an auxiliary private Git repository; `control/` stores ownership, state, SHA-256 manifests, blobs, and one journal entry per event. The manifests are the recovery authority: private Git does not replace content verification.
 
-En runs aislados creados con la semántica anterior, una raíz Git exacta y limpia usa worktree. Una raíz Git sucia o sin commit, una carpeta sin Git y una subcarpeta seleccionada dentro de un repositorio padre usan shadow; Baldr no expande el alcance al padre ni obliga a hacer stash. El original permanece sin cambios hasta que review aprueba o la persona elige aplicar el checkpoint verificado.
+For isolated runs created with the previous semantics, an exact clean Git root uses a worktree. A dirty or uncommitted Git root, a non-Git folder, and a selected subfolder inside a parent repository use a shadow; Baldr does not expand the scope to the parent or require a stash. The original remains unchanged until review approves or the user chooses to apply the verified checkpoint.
 
-La política siguiente permanece para flujos aislados explícitos de worktree/shadow:
+The following policy remains for explicit isolated worktree/shadow flows:
 
 ```toml
 [workspace]
 dirty_workspace_policy = "reject"
 ```
 
-`automatic` es el flujo predeterminado de escritura directa con autorización previa por tarea. `current` e `in-place` conservan el consentimiento directo persistente y exactamente la subcarpeta elegida como cwd, aunque Git se encuentre en un padre. `non-git` corresponde a **Sin protección** y exige consentimiento explícito. `worktree`, `auto` de bajo nivel y los shadows se conservan para runs aislados existentes y configuración avanzada.
+`automatic` is the default direct-write flow with prior per-task authorization. `current` and `in-place` preserve persistent direct consent and exactly the selected subfolder as cwd, even when Git lives in a parent. `non-git` corresponds to **No protection** and requires explicit consent. `worktree`, low-level `auto`, and shadows remain for existing isolated runs and advanced configuration.
 
-Antes de crear un shadow, Baldr excluye `.git`, `.hg`, `.svn`, un denylist mínimo no reemplazable de credenciales, patrones sensibles configurados y artefactos generados. Aplica límites visibles de entradas (incluidos directorios), bytes totales, tamaño individual, profundidad y enlaces. Sólo acepta symlinks relativos que permanezcan dentro del alcance; rechaza rutas no portables y reparse points no soportados. Los modos POSIX se conservan donde el filesystem los soporte; Windows usa semántica de permisos de mejor esfuerzo y falla explícitamente si no puede recrear un enlace.
+Before creating a shadow, Baldr excludes `.git`, `.hg`, `.svn`, a non-replaceable minimum credential denylist, configured sensitive patterns, and generated artifacts. It enforces visible limits for entries (including directories), total bytes, individual size, depth, and links. Only relative symlinks that remain in scope are accepted; non-portable paths and unsupported reparse points are rejected. POSIX modes are preserved where supported by the filesystem; Windows uses best-effort permission semantics and fails explicitly if it cannot recreate a link.
 
-Un cwd no se considera una frontera. En modos protegidos, adapters `advisory`, Codex SDK sin cwd demostrable y sandboxes irrestrictos se bloquean antes de ejecutar; sólo `read-only` o `workspace-write` con enforcement real son aceptados.
+A cwd is not considered a boundary. In protected modes, `advisory` adapters, the Codex SDK without a provable cwd, and unrestricted sandboxes are blocked before execution; only `read-only` or `workspace-write` with real enforcement are accepted.
 
-## 7. Salud y mantenimiento SQLite
+## 7. SQLite health and maintenance
 
-Baldr ejecuta:
+Baldr runs:
 
 ```text
 PRAGMA quick_check / integrity_check
 PRAGMA foreign_key_check
-backup transaccional antes de migraciones
-retención de terminal runs
-retención y limpieza segura de workspaces sombra
-GC de artifacts no referenciados
-expiración de provider sessions
+transactional backup before migrations
+terminal run retention
+safe retention and cleanup of shadow workspaces
+GC of unreferenced artifacts
+provider session expiration
 WAL checkpoint
 ```
 
-En un maintenance full también crea un backup verificable. La base y los shadows deben vivir en el filesystem local del runtime, especialmente dentro de WSL.
+Full maintenance also creates a verifiable backup. The database and shadows must live on the runtime's local filesystem, especially inside WSL.
 
-Por defecto, un shadow publicado y verificado se elimina inmediatamente; uno fallido se retiene 30 días y uno con conflicto terminal 90 días. `cleanup_successful_shadow_workspaces`, `retain_failed_shadow_workspaces`, `shadow_success_retention_hours`, `shadow_failed_retention_days` y `shadow_conflict_retention_days` permiten ajustar ese comportamiento. Si `cleanup_successful_shadow_workspaces=false`, maintenance tampoco elimina automáticamente los aprobados. Un conflicto no terminal sigue retenido hasta una decisión segura. Maintenance valida ownership, estado terminal y recuperabilidad antes de borrar.
+By default, a published and verified shadow is removed immediately; a failed one is retained for 30 days and one with a terminal conflict for 90 days. `cleanup_successful_shadow_workspaces`, `retain_failed_shadow_workspaces`, `shadow_success_retention_hours`, `shadow_failed_retention_days`, and `shadow_conflict_retention_days` tune that behavior. If `cleanup_successful_shadow_workspaces=false`, maintenance does not automatically remove approved shadows either. A non-terminal conflict remains retained until a safe decision. Maintenance validates ownership, terminal state, and recoverability before deletion.
 
-## 8. Lifecycle de sesiones
+## 8. Session lifecycle
 
-Las session keys incluyen scope, workspace/run, role, provider, profile y model/agent. Además se invalidan por:
+Session keys include scope, workspace/run, role, provider, profile, and model/agent. They are also invalidated by:
 
 - TTL;
-- máximo de turnos;
-- cambio de identidad del repositorio;
-- cambio de versión del provider;
-- cambio de modelo, que produce una key distinta.
+- maximum turn count;
+- repository identity change;
+- provider version change;
+- model change, which produces a different key.
 
-Los artifacts estructurados siguen siendo el contrato entre fases; la memoria de una sesión es una optimización, no la fuente de verdad.
+Structured artifacts remain the contract between phases; session memory is an optimization, not the source of truth.
 
-## 9. Reducers determinísticos
+## 9. Deterministic reducers
 
-Una fase puede tener N/M/L participants. Baldr consolida outputs estructurados sin invocar otro modelo.
+A phase may have N/M/L participants. Baldr consolidates structured outputs without invoking another model.
 
-Arquitectura:
+Architecture:
 
 ```text
 primary-with-advisors
@@ -156,7 +156,7 @@ unanimous
 conflict-blocks
 ```
 
-Revisión:
+Review:
 
 ```text
 any-blocker
@@ -165,27 +165,27 @@ quorum
 conflict-blocks
 ```
 
-Los conflictos quedan explícitos en `resolution.conflicts`; los write roles continúan prohibiendo múltiples escritores concurrentes.
+Conflicts remain explicit in `resolution.conflicts`; write roles continue to prohibit multiple concurrent writers.
 
-## 10. Pruebas de consistencia
+## 10. Consistency tests
 
-La suite cubre:
+The suite covers:
 
-- dos owners compitiendo por un lease;
-- worker obsoleto intentando escribir después de un takeover;
-- conflicto de idempotency fingerprint;
-- resume contra ruta o repo distinto;
-- cancelación idempotente y materializada;
-- acciones seguras de reconciliación calculadas por modo y estado;
-- reconstrucción de worktree;
-- creación y checkpoint durable de workspaces sombra;
-- preflight por hashes y publicación sombra idempotente;
-- crash durante una operación y recuperación desde cursor durable;
-- conflicto del original y descarte bloqueado después de publicación parcial;
-- límites, exclusiones, permisos, symlinks y repositorios anidados;
-- integrity, backup, WAL, GC y session expiry;
-- reducers con conflicto y quorum;
-- random walks de la state machine;
-- crash/restart en los boundaries durables de architecture, implementation y review.
+- two owners competing for a lease;
+- a stale worker attempting to write after a takeover;
+- idempotency fingerprint conflict;
+- resume against a different path or repository;
+- idempotent, materialized cancellation;
+- safe reconciliation actions calculated by mode and state;
+- worktree reconstruction;
+- creation and durable checkpointing of shadow workspaces;
+- hash preflight and idempotent shadow publication;
+- crash during an operation and recovery from the durable cursor;
+- original-workspace conflict and blocked discard after partial publication;
+- limits, exclusions, permissions, symlinks, and nested repositories;
+- integrity, backup, WAL, GC, and session expiry;
+- reducers with conflict and quorum;
+- random walks of the state machine;
+- crash/restart at the durable boundaries of architecture, implementation, and review.
 
-Las pruebas sintéticas no sustituyen los E2E reales de Windows/WSL, Remote WSL, Kiro y providers autenticados. Los runbooks permanecen bajo `e2e/` y deben ejecutarse tres veces consecutivas desde estados limpios.
+Synthetic tests do not replace real E2E runs on Windows/WSL, Remote WSL, Kiro, and authenticated providers. The runbooks remain under `e2e/` and must be run three consecutive times from clean states.

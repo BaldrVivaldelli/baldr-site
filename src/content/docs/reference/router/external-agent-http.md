@@ -1,12 +1,12 @@
 ---
 title: "External agent HTTP and Agent Manager contracts"
-description: "Referencia técnica de Baldr sincronizada desde v0.20.0."
+description: "Baldr technical reference synchronized from v0.20.0."
 editUrl: false
 ---
 
-:::note[Fuente canónica · v0.20.0]
-Esta página se genera desde [`external-agent-http.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/external-agent-http.md). No la edites en este repositorio.
-Digest de la fuente: `e638918b835860d2083e417cee6d1400bc861e408635a9ee7e3ba1f94bc51693`.
+:::note[Canonical source · v0.20.0]
+This page is generated from [`external-agent-http.md`](https://github.com/BaldrVivaldelli/baldr-router/blob/v0.20.0/docs/external-agent-http.md). Do not edit it in this repository.
+Source digest: `e638918b835860d2083e417cee6d1400bc861e408635a9ee7e3ba1f94bc51693`.
 :::
 Baldr's `http-json` connector invokes an externally hosted, read-only agent
 without passing through `ProviderRegistry`. The public wire contract is
@@ -109,10 +109,9 @@ resumed workflow.
 
 `baldr-router agent-catalog` combines safe local and manager metadata, health,
 version and last durable execution without
-returning transport targets. In VS Code choose **Agentes externos** from the
-plus menu or **Equipo de Baldr → Usar un agente externo registrado**. The
+returning transport targets. In VS Code choose **External agents** from the
+plus menu or **Baldr Team → Use a registered external agent**. The
 selector filters capabilities for the chosen phase, creates the immutable
-profile and assigns it without requiring manual TOML or JSON editing. **Equipo
-de Baldr → Administrar agentes externos** registers and manages the local
-bootstrap catalog; **Volver a Codex o Kiro normal** removes an external
+profile and assigns it without requiring manual TOML or JSON editing. **Baldr Team → Manage external agents** registers and manages the local
+bootstrap catalog; **Return to normal Codex or Kiro** removes an external
 binding from one role without changing the others.
