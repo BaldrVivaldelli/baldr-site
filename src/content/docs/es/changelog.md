@@ -3,6 +3,12 @@ title: Changelog
 description: Evolución del sitio público de Baldr.
 ---
 
+## 0.2.2 — Selector de recorridos de arquitectura centrado
+
+- El selector Coordinar/Publicar ocupa ahora el centro real del explorador de arquitectura.
+- El título de la sección conserva una columna izquierda independiente y deja de desplazar el selector.
+- Los layouts compactos mantienen el control apilado a todo el ancho.
+
 ## 0.2.1 — Búsqueda global centrada
 
 - El buscador queda centrado visualmente en el encabezado de escritorio en lugar de heredar el desplazamiento de la columna de contenido.

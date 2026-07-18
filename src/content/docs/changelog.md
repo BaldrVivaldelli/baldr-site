@@ -3,6 +3,12 @@ title: Changelog
 description: Evolution of Baldr's public website.
 ---
 
+## 0.2.2 — Centered architecture path selector
+
+- The Coordinate/Publish selector now occupies the true center of the architecture explorer.
+- The section heading keeps an independent left column instead of pushing the selector sideways.
+- Compact layouts retain the full-width stacked control.
+
 ## 0.2.1 — Centered global search
 
 - Search is visually centered in the desktop header instead of inheriting the content column offset.
