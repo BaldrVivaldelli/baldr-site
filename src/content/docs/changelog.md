@@ -3,6 +3,12 @@ title: Changelog
 description: Evolution of Baldr's public website.
 ---
 
+## 0.2.3 — Aligned architecture tabs
+
+- The Coordinate/Publish selector returns to its original right-aligned position.
+- Both labels now share the same height, margin, line height, and vertical center.
+- The selected and unselected states remain aligned across locales and breakpoints.
+
 ## 0.2.2 — Centered architecture path selector
 
 - The Coordinate/Publish selector now occupies the true center of the architecture explorer.

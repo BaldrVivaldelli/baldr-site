@@ -250,15 +250,11 @@ html[data-has-hero] .hero .actions {
 }
 
 .architecture-explorer__header {
-	display: grid;
-	grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+	display: flex;
+	justify-content: space-between;
 	align-items: flex-end;
 	gap: 2rem;
 	margin-bottom: 2rem;
-}
-
-.architecture-explorer__header .flow-tabs {
-	grid-column: 2;
 }
 
 .architecture-explorer__header h2,
@@ -280,6 +276,7 @@ html[data-has-hero] .hero .actions {
 
 .flow-tabs {
 	display: inline-flex;
+	align-items: center;
 	flex: none;
 	gap: 0.25rem;
 	padding: 0.25rem;
@@ -289,6 +286,11 @@ html[data-has-hero] .hero .actions {
 }
 
 .flow-tabs button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 2.75rem;
+	margin: 0;
 	padding: 0.55rem 0.9rem;
 	border: 0;
 	border-radius: 999px;
@@ -298,6 +300,7 @@ html[data-has-hero] .hero .actions {
 	font: inherit;
 	font-size: 0.82rem;
 	font-weight: 680;
+	line-height: 1;
 }
 
 .flow-tabs button[aria-selected='true'] {
@@ -520,7 +523,6 @@ html[data-has-hero] .hero .actions {
 
 @container architecture-explorer (max-width: 42rem) {
 	.architecture-explorer__header {
-		display: flex;
 		align-items: stretch;
 		flex-direction: column;
 	}

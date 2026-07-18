@@ -3,6 +3,12 @@ title: Changelog
 description: Evolución del sitio público de Baldr.
 ---
 
+## 0.2.3 — Pestañas de arquitectura alineadas
+
+- El selector Coordinar/Publicar vuelve a su posición original, alineado a la derecha.
+- Ambos textos comparten ahora altura, margen, interlineado y centro vertical.
+- Los estados seleccionado y no seleccionado permanecen alineados en ambos idiomas y breakpoints.
+
 ## 0.2.2 — Selector de recorridos de arquitectura centrado
 
 - El selector Coordinar/Publicar ocupa ahora el centro real del explorador de arquitectura.
