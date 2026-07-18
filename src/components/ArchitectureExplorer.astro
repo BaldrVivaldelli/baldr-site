@@ -1,0 +1,243 @@
+---
+const base = import.meta.env.BASE_URL.endsWith('/')
+	? import.meta.env.BASE_URL
+	: `${import.meta.env.BASE_URL}/`;
+
+const orchestration = [
+	{
+		id: 'surface',
+		kind: 'Experiencia',
+		name: 'VS Code · Kiro · MCP',
+		short: 'La persona inicia y observa el trabajo.',
+		title: 'Una tarea puede comenzar en cualquier superficie',
+		description:
+			'Las fachadas resuelven instalación y experiencia nativa. Todas hablan con el mismo contrato del Router, por lo que la coordinación no se reimplementa en cada cliente.',
+		href: `${base}integrations/`,
+	},
+	{
+		id: 'router',
+		kind: 'Control plane',
+		name: 'Router',
+		short: 'Coordina roles, políticas y recuperación.',
+		title: 'Router convierte la intención en un workflow durable',
+		description:
+			'Fija la configuración de la sesión, selecciona participantes exactos y conserva estado, evidencia y decisiones aunque el cliente se reinicie.',
+		href: `${base}components/router/`,
+	},
+	{
+		id: 'manager',
+		kind: 'Identidad',
+		name: 'Agent Manager',
+		short: 'Resuelve AgentRef y digest.',
+		title: 'Agent Manager resuelve identidades, no código fuente',
+		description:
+			'El catálogo devuelve una versión inmutable, sus capacidades y la ubicación estable del artefacto. El equipo propietario continúa siendo dueño del agente.',
+		href: `${base}components/agent-manager/`,
+	},
+	{
+		id: 'runner',
+		kind: 'Data plane',
+		name: 'Runner',
+		short: 'Verifica y ejecuta el artefacto.',
+		title: 'Runner aplica la frontera de ejecución',
+		description:
+			'Comprueba identidad y digest, limita tiempo y E/S, entrega solamente el workspace autorizado y conserva el resultado de la invocación.',
+		href: `${base}components/runner/`,
+	},
+	{
+		id: 'workspace',
+		kind: 'Resultado',
+		name: 'Workspace',
+		short: 'Cambios y evidencia verificables.',
+		title: 'El resultado vuelve como evidencia durable',
+		description:
+			'Planificación y revisión observan copias de solo lectura. Implementación puede recibir el workspace exacto únicamente cuando rol, manifiesto y política permiten escritura.',
+		href: `${base}concepts/capabilities-effects/`,
+	},
+];
+
+const publishing = [
+	{
+		id: 'source',
+		kind: 'Propiedad',
+		name: 'Repositorio del agente',
+		short: 'Código, prompts y pruebas del equipo.',
+		title: 'El agente nace fuera de Baldr',
+		description:
+			'Cada equipo elige lenguaje, diseño interno y calendario de release. Baldr no incorpora ese código a su núcleo.',
+		href: `${base}guides/create-agent/`,
+	},
+	{
+		id: 'sdk',
+		kind: 'Autoría',
+		name: 'SDK',
+		short: 'API mínima Python o TypeScript.',
+		title: 'El SDK expresa el contrato del agente',
+		description:
+			'La aplicación importa solamente la API de autoría: identidad, capacidades, eventos y respuesta. La toolchain queda fuera del runtime del agente.',
+		href: `${base}components/sdks/`,
+	},
+	{
+		id: 'builder',
+		kind: 'Toolchain',
+		name: 'Agent Builder',
+		short: 'Prueba, construye y publica.',
+		title: 'Builder gobierna el ciclo de release',
+		description:
+			'Una CLI neutral descubre el driver del lenguaje, exige builds reproducibles y publica versiones que no pueden cambiar silenciosamente.',
+		href: `${base}components/agent-builder/`,
+	},
+	{
+		id: 'driver',
+		kind: 'Políglota',
+		name: 'Driver',
+		short: 'Convierte fuentes en un artefacto.',
+		title: 'Cada lenguaje implementa Builder Protocol',
+		description:
+			'Python, TypeScript y futuros lenguajes pueden tener toolchains diferentes sin cambiar Agent Manager, Runner ni Router.',
+		href: `${base}reference/router/builder-protocol/`,
+	},
+	{
+		id: 'release',
+		kind: 'Distribución',
+		name: 'Release inmutable',
+		short: 'Artefacto, manifiesto y digest.',
+		title: 'El release cruza la frontera; el checkout no',
+		description:
+			'Baldr recibe una identidad exacta y una ubicación estable. Repetir la misma publicación es idempotente; cambiar contenido exige una versión nueva.',
+		href: `${base}concepts/identity/`,
+	},
+];
+---
+
+<section class="architecture-explorer" data-architecture-explorer>
+	<div class="architecture-explorer__header">
+		<div>
+			<h2>Seguí una tarea de punta a punta</h2>
+			<p>Elegí un recorrido y después un nodo para entender su frontera.</p>
+		</div>
+		<div class="flow-tabs" role="tablist" aria-label="Recorridos de arquitectura">
+			<button
+				type="button"
+				role="tab"
+				id="architecture-tab-orchestration"
+				aria-controls="architecture-flow-orchestration"
+				aria-selected="true"
+				data-flow-tab="orchestration"
+			>
+				Coordinar
+			</button>
+			<button
+				type="button"
+				role="tab"
+				id="architecture-tab-publishing"
+				aria-controls="architecture-flow-publishing"
+				aria-selected="false"
+				tabindex="-1"
+				data-flow-tab="publishing"
+			>
+				Publicar
+			</button>
+		</div>
+	</div>
+
+	{[
+		{ id: 'orchestration', nodes: orchestration },
+		{ id: 'publishing', nodes: publishing },
+	].map((flow, flowIndex) => (
+		<div
+			class="architecture-flow"
+			id={`architecture-flow-${flow.id}`}
+			role="tabpanel"
+			aria-labelledby={`architecture-tab-${flow.id}`}
+			data-flow={flow.id}
+			hidden={flowIndex !== 0}
+		>
+			{flow.nodes.map((node, nodeIndex) => (
+				<button
+					type="button"
+					class="architecture-node"
+					aria-pressed={nodeIndex === 0 ? 'true' : 'false'}
+					aria-controls={`architecture-panel-${flow.id}-${node.id}`}
+					data-node={`${flow.id}-${node.id}`}
+				>
+					<span class="architecture-node__kind">{node.kind}</span>
+					<strong>{node.name}</strong>
+					<small>{node.short}</small>
+				</button>
+			))}
+		</div>
+	))}
+
+	{[
+		{ id: 'orchestration', nodes: orchestration },
+		{ id: 'publishing', nodes: publishing },
+	].flatMap((flow, flowIndex) =>
+		flow.nodes.map((node, nodeIndex) => (
+			<article
+				class="architecture-panel"
+				id={`architecture-panel-${flow.id}-${node.id}`}
+				data-panel={`${flow.id}-${node.id}`}
+				hidden={flowIndex !== 0 || nodeIndex !== 0}
+			>
+				<h3>{node.title}</h3>
+				<p>{node.description}</p>
+				<a href={node.href}>Explorar {node.name} →</a>
+			</article>
+		)),
+	)}
+</section>
+
+<script>
+	for (const explorer of document.querySelectorAll('[data-architecture-explorer]')) {
+		const tabs = explorer.querySelectorAll('[data-flow-tab]');
+		const flows = explorer.querySelectorAll('[data-flow]');
+		const nodes = explorer.querySelectorAll('[data-node]');
+		const panels = explorer.querySelectorAll('[data-panel]');
+
+		function showNode(key: string | null) {
+			for (const node of nodes) {
+				node.setAttribute('aria-pressed', String(node.getAttribute('data-node') === key));
+			}
+			for (const panel of panels) {
+				panel.toggleAttribute('hidden', panel.getAttribute('data-panel') !== key);
+			}
+		}
+
+		function selectFlow(tab: Element) {
+			const selected = tab.getAttribute('data-flow-tab');
+			for (const candidate of tabs) {
+				const active = candidate.getAttribute('data-flow-tab') === selected;
+				candidate.setAttribute('aria-selected', String(active));
+				candidate.setAttribute('tabindex', active ? '0' : '-1');
+			}
+			for (const flow of flows) {
+				flow.toggleAttribute('hidden', flow.getAttribute('data-flow') !== selected);
+			}
+			const first = explorer.querySelector(`[data-node^="${selected}-"]`);
+			if (first) showNode(first.getAttribute('data-node'));
+		}
+
+		for (const tab of tabs) {
+			tab.addEventListener('click', () => selectFlow(tab));
+			tab.addEventListener('keydown', (event) => {
+				if (!(event instanceof KeyboardEvent) || !['ArrowLeft', 'ArrowRight'].includes(event.key)) {
+					return;
+				}
+				event.preventDefault();
+				const ordered = Array.from(tabs);
+				const current = ordered.indexOf(tab);
+				const offset = event.key === 'ArrowRight' ? 1 : -1;
+				const next = ordered[(current + offset + ordered.length) % ordered.length];
+				if (next instanceof HTMLElement) {
+					selectFlow(next);
+					next.focus();
+				}
+			});
+		}
+
+		for (const node of nodes) {
+			node.addEventListener('click', () => showNode(node.getAttribute('data-node')));
+		}
+	}
+</script>

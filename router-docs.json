@@ -1,0 +1,34 @@
+{
+  "repository": "https://github.com/BaldrVivaldelli/baldr-router",
+  "ref": "v0.20.0",
+  "sourceDirectory": "docs",
+  "targetDirectory": "src/content/docs/reference/router",
+  "titleOverrides": {
+    "agentes-externos-necesitan-fronteras.md": "Agentes externos necesitan fronteras",
+    "consistency-operator-control.md": "Consistency and Operator Control"
+  },
+  "documents": [
+    "agentes-externos-necesitan-fronteras.md",
+    "agent-manager-operations.md",
+    "architecture.md",
+    "baldr-console.md",
+    "builder-protocol.md",
+    "clean-machine-install.md",
+    "codex.md",
+    "consistency-operator-control.md",
+    "durable-orchestration.md",
+    "external-agent-http.md",
+    "external-agent-registry.md",
+    "external-agent-runtime.md",
+    "kiro.md",
+    "migration-0.20.md",
+    "multi-agent-workflows.md",
+    "narrative-progress.md",
+    "real-environment-qualification.md",
+    "release-candidate-hardening.md",
+    "release-packaging.md",
+    "validation-lab-workspace-probe.md",
+    "vscode.md",
+    "windows-wsl.md"
+  ]
+}

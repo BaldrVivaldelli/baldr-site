@@ -1,0 +1,30 @@
+{
+  "name": "@baldr/site",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check:astro": "astro check",
+    "check:html": "html-validate \"dist/**/*.html\"",
+    "check:links": "node scripts/check-links.mjs",
+    "check": "npm run check:astro && npm run build && npm run check:html && npm run check:links",
+    "sync:router-docs": "node scripts/sync-router-docs.mjs",
+    "sync:check": "node scripts/sync-router-docs.mjs --check"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "0.41.3",
+    "astro": "7.1.1",
+    "sharp": "0.34.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.9",
+    "html-validate": "11.5.6",
+    "typescript": "6.0.3"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

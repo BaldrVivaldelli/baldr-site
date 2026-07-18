@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout site
+        uses: actions/checkout@v7
+
+      - name: Checkout pinned Router documentation
+        uses: actions/checkout@v7
+        with:
+          repository: BaldrVivaldelli/baldr-router
+          ref: v0.20.0
+          path: .router-source
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Verify synchronized Router documentation
+        env:
+          BALDR_ROUTER_SOURCE: ${{ github.workspace }}/.router-source
+        run: npm run sync:check
+
+      - name: Check and build
+        run: npm run check
