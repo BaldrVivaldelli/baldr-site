@@ -3,6 +3,11 @@ title: Changelog
 description: Evolution of Baldr's public website.
 ---
 
+## 0.2.4 — Aligned principle row
+
+- Ownership, Identity, and Continuity now share the same vertical baseline.
+- Inherited Markdown spacing can no longer offset later cells in the grid.
+
 ## 0.2.3 — Aligned architecture tabs
 
 - The Coordinate/Publish selector returns to its original right-aligned position.

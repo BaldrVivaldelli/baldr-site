@@ -3,6 +3,11 @@ title: Changelog
 description: Evolución del sitio público de Baldr.
 ---
 
+## 0.2.4 — Fila de principios alineada
+
+- Propiedad, Identidad y Continuidad comparten ahora la misma línea vertical.
+- El espaciado heredado de Markdown ya no desplaza las últimas celdas de la grilla.
+
 ## 0.2.3 — Pestañas de arquitectura alineadas
 
 - El selector Coordinar/Publicar vuelve a su posición original, alineado a la derecha.
