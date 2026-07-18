@@ -62,6 +62,22 @@ body {
 	background: color-mix(in srgb, var(--sl-color-black) 88%, transparent);
 }
 
+/* Keep search visually centered instead of tying it to the content column. */
+@media (min-width: 64rem) {
+	.header {
+		grid-template-columns: minmax(0, 1fr) minmax(18rem, 28rem) minmax(0, 1fr);
+	}
+
+	.header > :nth-child(2) {
+		min-width: 0;
+		justify-content: center;
+	}
+
+	.header .right-group {
+		justify-self: end;
+	}
+}
+
 .site-title img {
 	height: 2.35rem;
 	width: auto;

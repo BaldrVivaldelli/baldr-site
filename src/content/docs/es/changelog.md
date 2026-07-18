@@ -3,6 +3,12 @@ title: Changelog
 description: Evolución del sitio público de Baldr.
 ---
 
+## 0.2.1 — Búsqueda global centrada
+
+- El buscador queda centrado visualmente en el encabezado de escritorio en lugar de heredar el desplazamiento de la columna de contenido.
+- La marca y los controles globales permanecen anclados en sus extremos respectivos.
+- Tablet y móvil conservan el comportamiento responsive nativo de Starlight.
+
 ## 0.2.0 — Documentación bilingüe con inglés predeterminado
 
 - El sitio y toda la documentación usan inglés como idioma predeterminado.

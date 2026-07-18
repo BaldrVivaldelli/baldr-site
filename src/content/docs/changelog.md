@@ -3,6 +3,12 @@ title: Changelog
 description: Evolution of Baldr's public website.
 ---
 
+## 0.2.1 — Centered global search
+
+- Search is visually centered in the desktop header instead of inheriting the content column offset.
+- Brand and global controls remain anchored to their respective edges.
+- Tablet and mobile keep Starlight's native responsive header behavior.
+
 ## 0.2.0 — English-first bilingual documentation
 
 - English is now the default language for the full website and documentation.
