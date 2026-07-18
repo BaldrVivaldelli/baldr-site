@@ -161,7 +161,12 @@ const publishing = [
 					aria-controls={`architecture-panel-${flow.id}-${node.id}`}
 					data-node={`${flow.id}-${node.id}`}
 				>
-					<span class="architecture-node__kind">{node.kind}</span>
+					<span class="architecture-node__meta">
+						<span class="architecture-node__kind">{node.kind}</span>
+						<span class="architecture-node__index" aria-hidden="true">
+							{String(nodeIndex + 1).padStart(2, '0')}
+						</span>
+					</span>
 					<strong>{node.name}</strong>
 					<small>{node.short}</small>
 				</button>

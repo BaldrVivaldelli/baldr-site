@@ -3,6 +3,15 @@ title: Changelog
 description: Evolución del sitio público de Baldr.
 ---
 
+## 0.1.1 — Portada con una retícula de producto
+
+- Hero, mensaje principal y diagrama reunidos en una composición equilibrada.
+- Principios, recorrido y responsabilidades alineados sobre el mismo ancho.
+- Tarjetas uniformes y entradas organizadas por objetivo.
+- Navegación de arquitectura numerada y más legible.
+- Marca corregida para evitar duplicación y funcionar en temas claro y oscuro.
+- Composición responsive comprobada en escritorio y móvil.
+
 ## 0.1.0 — Primera navegación pública
 
 - Landing y explicación de la frontera de Baldr.

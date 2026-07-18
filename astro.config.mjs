@@ -16,7 +16,7 @@ export default defineConfig({
 			favicon: '/favicon.svg',
 			logo: {
 				src: './src/assets/baldr-logo.svg',
-				alt: 'Baldr',
+				alt: '',
 			},
 			customCss: ['./src/styles/custom.css'],
 			social: [

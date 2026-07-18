@@ -1,8 +1,11 @@
 ---
-title: Baldr
+title: Coordiná agentes sin absorberlos
 description: Control plane local para coordinar agentes, herramientas y trabajo durable.
 template: splash
+editUrl: false
+lastUpdated: false
 hero:
+  title: "Coordiná agentes.<br /><span>Sin absorberlos.</span>"
   tagline: Coordiná agentes externos, Codex y Kiro desde un control plane local, durable y explicable.
   image:
     file: ../../assets/baldr-orbit.svg
@@ -17,47 +20,6 @@ hero:
       variant: minimal
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
-import ArchitectureExplorer from '../../components/ArchitectureExplorer.astro';
+import LandingPage from '../../components/LandingPage.astro';
 
-## El comportamiento vive afuera. La coordinación queda en Baldr.
-
-Los equipos mantienen el código, los prompts, las pruebas y el release de sus
-agentes. Baldr descubre identidades exactas, aplica capacidades y efectos,
-ejecuta artefactos fuera del Router y conserva el estado del trabajo.
-
-<div class="metric-strip">
-	<div><strong>2</strong><span>SDKs: Python y TypeScript</span></div>
-	<div><strong>3</strong><span>Fases: planificar, implementar y revisar</span></div>
-	<div><strong>1</strong><span>Contrato para todas las superficies</span></div>
-</div>
-
-<ArchitectureExplorer />
-
-## Una plataforma, responsabilidades claras
-
-<CardGrid stagger>
-	<Card title="Coordinar sin absorber" icon="seti:typescript">
-		Router conoce identidad, capacidades y resultados. El código privado del agente
-		permanece en el repositorio de su equipo.
-	</Card>
-	<Card title="Publicar de forma reproducible" icon="package">
-		Agent Builder delega cada lenguaje a un driver y produce releases inmutables
-		identificados por versión y digest.
-	</Card>
-	<Card title="Ejecutar bajo una frontera" icon="lock">
-		Runner verifica el artefacto y entrega solamente el workspace y los efectos que
-		la fase permite.
-	</Card>
-	<Card title="Continuar después de un reinicio" icon="reload">
-		Los workflows, intentos, decisiones y resultados quedan en un estado durable que
-		no depende de que la interfaz siga abierta.
-	</Card>
-</CardGrid>
-
-## Elegí tu entrada
-
-- **Quiero entender el sistema:** empezá por [Qué es Baldr](/baldr-site/overview/).
-- **Quiero crear un agente:** seguí la [guía de autoría](/baldr-site/guides/create-agent/).
-- **Quiero integrar una herramienta:** revisá [VS Code, Kiro, CLI y MCP](/baldr-site/integrations/).
-- **Quiero el contrato exacto:** abrí la [referencia técnica versionada](/baldr-site/reference/).
+<LandingPage />
