@@ -16,6 +16,9 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Checkout pinned Router documentation
+        id: router
+        # baldr-router is private for now; the sync check resumes once it is public again.
+        continue-on-error: true
         uses: actions/checkout@v7
         with:
           repository: BaldrVivaldelli/baldr-router
@@ -32,9 +35,14 @@ jobs:
         run: npm ci --ignore-scripts --no-audit --no-fund
 
       - name: Verify synchronized Router documentation
+        if: steps.router.outcome == 'success'
         env:
           BALDR_ROUTER_SOURCE: ${{ github.workspace }}/.router-source
         run: npm run sync:check
+
+      - name: Report skipped Router documentation check
+        if: steps.router.outcome != 'success'
+        run: echo "::warning::baldr-router is not readable from this workflow; sync:check against v0.20.0 was skipped."
 
       - name: Check and build
         run: npm run check
