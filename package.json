@@ -15,16 +15,16 @@
     "sync:check": "node scripts/sync-router-docs.mjs --check"
   },
   "dependencies": {
-    "@astrojs/starlight": "0.41.3",
-    "astro": "7.1.1",
-    "sharp": "0.34.5"
+    "@astrojs/starlight": "0.42.6",
+    "astro": "7.4.2",
+    "sharp": "0.35.5"
   },
   "devDependencies": {
-    "@astrojs/check": "0.9.9",
-    "html-validate": "11.5.6",
+    "@astrojs/check": "0.9.12",
+    "html-validate": "11.17.0",
     "typescript": "6.0.3"
   },
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=22.23.4"
   }
 }
